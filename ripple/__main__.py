@@ -1,16 +1,3 @@
-"""Command-line entry point.
-
-    python -m ripple node --id n1 --port 7001 --seed host:7000
-    python -m ripple publish --seed host:7000 --path /etc/app.conf --file ./app.conf
-    python -m ripple ls      --seed host:7000
-    python -m ripple cat     --seed host:7000 --path /etc/app.conf
-    python -m ripple dash    --peers host1:7001,host2:7002 --port 8080
-
-Used by the Docker deployment, where every container is one node. `node` blocks;
-everything else is a one-shot client that talks the same wire protocol any peer
-speaks -- there is no privileged control channel.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -55,9 +42,6 @@ def cmd_node(a) -> int:
           flush=True)
 
     for seed in parse_addrs(a.seed or ""):
-        # Seeds may not be up yet in a container start-up race, so retry rather
-        # than exit: a node that gives up on bootstrap needs manual intervention,
-        # which is the opposite of what a cluster member should require.
         for attempt in range(60):
             if node.join(*seed):
                 print("[%s] joined via %s:%d" % (node.node_id, *seed), flush=True)
@@ -91,12 +75,6 @@ def cmd_node(a) -> int:
 
 
 def cmd_publish(a) -> int:
-    """Publish through a running node by asking it to ingest a local file.
-
-    The file has to be readable by that node, which is the honest constraint:
-    publishing is an operation a node performs on its own storage, not something
-    a client can inject from outside.
-    """
     addr = parse_addr(a.seed)
     head, _ = ask(addr, {"type": P.STATE_GET})
     node_id = head.get("state", {}).get("node", "?")

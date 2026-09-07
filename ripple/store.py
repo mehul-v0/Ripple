@@ -1,23 +1,13 @@
-"""Content-addressed chunk store.
-
-Chunks are filed under their own SHA-256, which gives cluster-wide dedup across
-files for free and makes integrity intrinsic: a chunk's name is a checksum of
-its content, so any node can verify anything it receives.
-
-Writes are atomic (temp, fsync, rename) so a crash cannot leave a torn chunk
-that would later be indistinguishable from disk corruption.
-"""
-
 from __future__ import annotations
 
 import hashlib
 import os
 import threading
+import time
 from typing import Dict, Iterator, List, Optional
 
 
 def atomic_write(path: str, data: bytes, do_fsync: bool = True) -> None:
-    """Write `data` to `path` so readers see all of it or none of it."""
     tmp = path + ".tmp.%d" % os.getpid()
     d = os.path.dirname(path)
     if d:
@@ -27,7 +17,7 @@ def atomic_write(path: str, data: bytes, do_fsync: bool = True) -> None:
         if do_fsync:
             fh.flush()
             os.fsync(fh.fileno())
-    os.replace(tmp, path)  # atomic on POSIX and on Windows (MoveFileEx)
+    os.replace(tmp, path)
 
 
 class ChunkStore:
@@ -37,13 +27,12 @@ class ChunkStore:
         self.fsync = fsync
         os.makedirs(self.objects, exist_ok=True)
         self._lock = threading.RLock()
-        self._index: Dict[str, int] = {}   # chunk hash -> size
-        self._logical_bytes = 0            # bytes if we stored every reference
+        self._index: Dict[str, int] = {}
+        self._logical_bytes = 0
+        self._atime: Dict[str, float] = {}
         self._scan()
 
     def _path(self, h: str) -> str:
-        # Two-level fan-out keeps any one directory small enough to stay fast at
-        # millions of chunks.
         return os.path.join(self.objects, h[:2], h[2:4], h)
 
     def _scan(self) -> None:
@@ -57,7 +46,9 @@ class ChunkStore:
                     continue
                 for name in os.listdir(p2):
                     if len(name) == 64:
-                        self._index[name] = os.path.getsize(os.path.join(p2, name))
+                        full = os.path.join(p2, name)
+                        self._index[name] = os.path.getsize(full)
+                        self._atime[name] = os.path.getmtime(full)
 
     def has(self, h: str) -> bool:
         with self._lock:
@@ -74,23 +65,20 @@ class ChunkStore:
             return out
 
     def put(self, data: bytes, expected: Optional[str] = None) -> str:
-        """Store a chunk, verifying it against its claimed hash.
-
-        Verification is not optional: peers are untrusted, and storing mislabelled data
-        would poison every node that later replicates from us.
-        """
         h = hashlib.sha256(data).hexdigest()
         if expected is not None and expected != h:
             raise ValueError("chunk hash mismatch: claimed %s, computed %s" % (expected, h))
         with self._lock:
             self._logical_bytes += len(data)
             if h in self._index:
-                return h  # dedup hit: the bytes are already here
+                self._atime[h] = time.time()
+                return h
         path = self._path(h)
         if not os.path.exists(path):
             atomic_write(path, data, self.fsync)
         with self._lock:
             self._index[h] = len(data)
+            self._atime[h] = time.time()
         return h
 
     def get(self, h: str) -> Optional[bytes]:
@@ -98,31 +86,34 @@ class ChunkStore:
             return None
         try:
             with open(self._path(h), "rb") as fh:
-                return fh.read()
+                data = fh.read()
         except FileNotFoundError:
             with self._lock:
                 self._index.pop(h, None)
+                self._atime.pop(h, None)
             return None
+        with self._lock:
+            self._atime[h] = time.time()
+        return data
+
+    def coldest(self, candidates) -> List[str]:
+        with self._lock:
+            return sorted(candidates, key=lambda h: self._atime.get(h, 0.0))
 
     def verify(self, h: str) -> bool:
-        """Re-read a chunk and confirm it still hashes to its own name."""
         data = self.get(h)
         return data is not None and hashlib.sha256(data).hexdigest() == h
 
     def drop(self, h: str) -> None:
         with self._lock:
             self._index.pop(h, None)
+            self._atime.pop(h, None)
         try:
             os.remove(self._path(h))
         except OSError:
             pass
 
     def damage(self, h: str) -> bool:
-        """Flip a byte on disk without updating the index. Chaos testing only.
-
-        Simulates silent corruption: right size, still present, nothing notices until
-        something verifies it.
-        """
         if not self.has(h):
             return False
         path = self._path(h)
@@ -134,6 +125,10 @@ class ChunkStore:
             fh.seek(0)
             fh.write(bytes(data))
         return True
+
+    def size_of(self, h: str) -> int:
+        with self._lock:
+            return self._index.get(h, 0)
 
     def hashes(self) -> List[str]:
         with self._lock:
@@ -148,7 +143,6 @@ class ChunkStore:
             return sum(self._index.values())
 
     def logical_bytes(self) -> int:
-        """Bytes we would have stored with no deduplication."""
         with self._lock:
             return self._logical_bytes
 

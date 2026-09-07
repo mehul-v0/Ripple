@@ -10,69 +10,138 @@
     --ink:#e6edf7; --dim:#8b98ad; --faint:#5b6678;
     --phantom:#3d4a63; --partial:#e0a33e; --resident:#3ddc91; --dead:#ff5c5c;
     --accent:#5aa9ff; --warn:#ff9f45;
+    /* One type scale for the whole page. Sized to stay readable on a
+       projector and in a recorded demo, where the old 10-11px text was not.
+       Change --fs-base and everything tracks it. */
+    --fs-micro:12px;    /* chips, sub-labels, dense table cells */
+    --fs-small:13px;    /* captions, legends, secondary rows   */
+    --fs-body:14px;     /* controls, log lines, table body     */
+    --fs-base:15px;     /* page default                        */
+    --fs-lg:19px;       /* tile numbers                        */
+    --fs-xl:22px;       /* header stat numbers                 */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
-       font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+       font:var(--fs-base)/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   header{display:flex;align-items:baseline;gap:18px;padding:14px 20px;
          border-bottom:1px solid var(--line);background:var(--panel2);flex-wrap:wrap}
-  h1{margin:0;font-size:17px;letter-spacing:.14em;font-weight:600}
+  h1{margin:0;font-size:21px;letter-spacing:.14em;font-weight:600}
   h1 .dot{color:var(--accent)}
-  .tag{color:var(--faint);font-size:11.5px}
-  .stats{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
-  .stat b{display:block;font-size:16px;color:var(--ink);font-weight:600}
-  .stat span{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.09em}
-  main{display:grid;grid-template-columns:minmax(420px,1.15fr) minmax(380px,1fr);
+  .tag{color:var(--faint);font-size:var(--fs-small)}
+  .stats{margin-left:auto;display:flex;gap:24px;flex-wrap:wrap}
+  .stat b{display:block;font-size:var(--fs-xl);color:var(--ink);font-weight:600}
+  .stat span{font-size:var(--fs-micro);color:var(--faint);text-transform:uppercase;
+             letter-spacing:.09em}
+  main{display:grid;grid-template-columns:minmax(470px,1.15fr) minmax(430px,1fr);
        gap:14px;padding:14px;align-items:start}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .panel > h2{margin:0;padding:9px 13px;font-size:11px;letter-spacing:.12em;
+  .panel > h2{margin:0;padding:10px 14px;font-size:var(--fs-small);letter-spacing:.12em;
               text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);
               background:var(--panel2);font-weight:600;display:flex;gap:10px;align-items:center}
   .panel > h2 .right{margin-left:auto;color:var(--faint);text-transform:none;letter-spacing:0}
   .body{padding:12px 13px}
   svg{display:block;width:100%;height:auto}
-  .legend{display:flex;gap:14px;padding:0 13px 11px;color:var(--dim);font-size:11px;flex-wrap:wrap}
-  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;
+  .legend{display:flex;gap:14px;padding:0 14px 12px;color:var(--dim);
+          font-size:var(--fs-small);flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;
             vertical-align:middle}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{text-align:left;color:var(--faint);font-weight:500;font-size:10.5px;
-     text-transform:uppercase;letter-spacing:.07em;padding:5px 8px;border-bottom:1px solid var(--line)}
-  td{padding:6px 8px;border-bottom:1px solid #1a2130}
+  table{width:100%;border-collapse:collapse;font-size:var(--fs-body)}
+  th{text-align:left;color:var(--faint);font-weight:500;font-size:var(--fs-micro);
+     text-transform:uppercase;letter-spacing:.07em;padding:7px 9px;border-bottom:1px solid var(--line)}
+  td{padding:8px 9px;border-bottom:1px solid #1a2130}
   tr.sel td{background:#182236}
   tr.file{cursor:pointer}
   tr.file:hover td{background:#161d2b}
-  .bar{height:6px;border-radius:3px;background:#1d2534;overflow:hidden;min-width:70px}
+  .bar{height:7px;border-radius:3px;background:#1d2534;overflow:hidden;min-width:80px}
   .bar>div{height:100%;background:linear-gradient(90deg,var(--partial),var(--resident))}
   .mono{color:var(--dim)}
   .num{text-align:right;font-variant-numeric:tabular-nums}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px}
-  .tile{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 10px}
-  .tile b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
-  .tile span{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(134px,1fr));gap:10px}
+  .tile{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:11px 12px}
+  .tile b{display:block;font-size:var(--fs-lg);font-variant-numeric:tabular-nums}
+  .tile span{font-size:var(--fs-micro);color:var(--faint);text-transform:uppercase;
+             letter-spacing:.06em}
   button{background:#1c2432;color:var(--ink);border:1px solid #2b3648;border-radius:6px;
-         padding:6px 10px;font:inherit;font-size:11.5px;cursor:pointer}
+         padding:7px 12px;font:inherit;font-size:var(--fs-body);cursor:pointer}
   button:hover{background:#243044;border-color:#3a4860}
   button.danger{border-color:#5a2b2b;color:#ffb3b3}
   button.danger:hover{background:#37201f}
   button.go{border-color:#2b5a45;color:#9befcb}
   button.go:hover{background:#1c3a2c}
   button:disabled{opacity:.4;cursor:not-allowed}
-  .row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
-  .row label{color:var(--faint);font-size:11px;margin-right:2px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .row label{color:var(--faint);font-size:var(--fs-small);margin-right:2px}
   select,input{background:#0d121b;color:var(--ink);border:1px solid #2b3648;
-               border-radius:6px;padding:5px 7px;font:inherit;font-size:11.5px}
-  #log{height:210px;overflow-y:auto;font-size:11.5px;padding:8px 13px}
-  #log div{padding:2px 0;border-bottom:1px solid #161c28;display:flex;gap:8px}
-  #log .who{color:var(--accent);min-width:52px}
-  #log .kind{min-width:74px;color:var(--faint)}
+               border-radius:6px;padding:6px 9px;font:inherit;font-size:var(--fs-body)}
+  #log{height:min(58vh,620px);overflow-y:auto;font-size:var(--fs-body);padding:9px 14px}
+  #log div.ev{padding:3px 0;border-bottom:1px solid #161c28;display:flex;gap:10px;
+              align-items:baseline}
+  #log .who{color:var(--accent);min-width:60px;flex:none}
+  #log .kind{min-width:88px;color:var(--faint);flex:none}
+  #log .ts{color:#4c586d;min-width:80px;flex:none;font-variant-numeric:tabular-nums}
+  #log .msg{flex:1;word-break:break-word}
+  #log div.lvl-error{background:#1e1214}
+  #log div.lvl-error .msg{color:#ff9d9d}
+  #log div.lvl-warn .msg{color:#e8c07d}
+  #log div.lvl-good .msg{color:#8fe3b0}
+  .logbtn{background:#0d121b;color:var(--ink);border:1px solid #2b3648;border-radius:6px;
+          padding:6px 11px;font:inherit;font-size:var(--fs-small);cursor:pointer}
+  .logbtn:hover{border-color:#3d4c66}
+  .logbtn.on{background:#2a1d1d;border-color:#7a3b3b;color:#ffb4b4}
+  .logchk{color:var(--faint);font-size:var(--fs-small);display:flex;align-items:center;gap:5px}
+  .logstats{display:flex;gap:7px;flex-wrap:wrap;padding:9px 14px 0}
+  .logstat{background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+           padding:3px 9px;font-size:var(--fs-micro);color:var(--faint);cursor:pointer}
+  .logstat:hover{border-color:#3d4c66;color:var(--ink)}
+  .logstat b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .dur{display:flex;gap:3px;align-items:center;margin-top:4px}
+  .dur i{width:15px;height:6px;border-radius:2px;background:#222a39;display:block}
+  .dur i.on{background:var(--resident)}
+  .dur i.risk{background:var(--dead)}
+  .dur span{font-size:var(--fs-micro);color:var(--faint);margin-left:5px;font-style:normal}
+  .oc-bar{height:6px;background:#222a39;border-radius:3px;overflow:hidden;margin-top:4px}
+  .oc-bar div{height:100%;background:var(--partial)}
+  .oc-bar div.over{background:var(--dead)}
   .k-conflict .kind,.k-error .kind{color:var(--warn)}
   .k-heal .kind,.k-repair .kind{color:var(--resident)}
   .k-rollback .kind{color:var(--accent)}
-  .hint{color:var(--faint);font-size:11px;padding:0 13px 11px;line-height:1.6}
-  .node-label{font-size:8px;fill:var(--faint)}
+  .k-erasure .kind{color:#c792ea}
+  .k-drift .kind{color:var(--warn)}
+  .hint{color:var(--faint);font-size:var(--fs-small);padding:0 14px 12px;line-height:1.65}
+  /* Inside the ring's 640x460 viewBox, which is scaled down to the panel
+     width -- so these are user units and render smaller than they read here. */
+  .node-label{font-size:16px;fill:var(--dim)}
   circle.node{cursor:pointer;transition:r .2s}
   circle.node:hover{stroke:#fff;stroke-width:1.5}
-  @media(max-width:900px){main{grid-template-columns:1fr}}
+  .logbar{display:flex;gap:8px;align-items:center;padding:9px 14px 0;flex-wrap:wrap}
+  .logbar select,.logbar input{font-size:var(--fs-small);padding:6px 8px}
+  /* Only the search box grows. Scoping this by type matters: a bare
+     `.logbar input` also matches the checkbox, which then stretches across
+     the row and detaches from its label. */
+  .logbar input[type=text]{flex:1;min-width:150px}
+  .logchk input{flex:none;margin:0}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+           gap:8px;padding:12px 14px}
+  .metric{background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+          padding:9px 11px;display:flex;justify-content:space-between;gap:10px;
+          font-size:var(--fs-body)}
+  .metric b{font-variant-numeric:tabular-nums;color:var(--ink)}
+  .metric span{color:var(--faint);font-size:var(--fs-micro);text-transform:uppercase;
+               letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ec-chip{display:inline-block;background:#241a30;color:#c792ea;border:1px solid #3a2850;
+           border-radius:4px;padding:2px 8px;font-size:var(--fs-micro);margin-left:7px}
+  .toggle{cursor:pointer;user-select:none}
+  .toggle:hover{color:var(--ink)}
+  /* Spans both grid columns: eleven columns of per-node internals do not fit
+     in half the page, and horizontally scrolling the panel that exists to
+     show the work is the wrong compromise. */
+  .panel.full{grid-column:1/-1}
+  .internals-wrap{overflow-x:auto}
+  .internals-wrap table{min-width:1020px}
+  .up{color:var(--resident)} .down{color:var(--dead)}
+  /* Wider columns now, so drop to a single column sooner rather than
+     squeezing the ring and the tables into unreadable widths. */
+  @media(max-width:1120px){main{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -85,6 +154,8 @@
     <div class="stat"><b id="s-moved">–</b><span>bytes moved</span></div>
     <div class="stat"><b id="s-resident">–</b><span>resident</span></div>
     <div class="stat"><b id="s-dedup">–</b><span>dedup</span></div>
+    <div class="stat"><b id="s-gossip">–</b><span>gossip rounds</span></div>
+    <div class="stat"><b id="s-ec">–</b><span>ec reconstructions</span></div>
   </div>
 </header>
 
@@ -112,6 +183,7 @@
           <button class="danger" data-c="kill">kill</button>
           <button class="go" data-c="revive">revive</button>
           <button class="danger" data-c="corrupt">corrupt a chunk</button>
+          <button class="danger" data-c="byzantine">make it lie (byzantine)</button>
         </div>
         <div class="row">
           <label>link</label>
@@ -128,21 +200,6 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <section>
-    <div class="panel">
-      <h2>Files <span class="right" id="file-count"></span></h2>
-      <table>
-        <thead><tr><th>path</th><th class="num">size</th><th class="num">manifest</th>
-          <th style="width:34%">materialised across cluster</th></tr></thead>
-        <tbody id="files"></tbody>
-      </table>
-      <div class="hint">A file is <em>present</em> on every node the moment its manifest
-        lands. The bar shows how many chunks have actually been pulled — which for most
-        files, most of the time, is deliberately not all of them.</div>
-    </div>
-
     <div class="panel" style="margin-top:14px">
       <h2>Demo</h2>
       <div class="body">
@@ -159,22 +216,94 @@
           <button class="danger" data-a="drift">drift one node</button>
           <button data-a="check_drift">find drift (0 bytes)</button>
         </div>
-        <div id="drift-out" class="mono" style="font-size:11.5px;margin:-2px 0 9px"></div>
+        <div id="drift-out" class="mono" style="font-size:var(--fs-body);margin:-2px 0 9px"></div>
+        <div class="row">
+          <label>erasure coding (k=4, m=2 &mdash; survives losing any 2 of 6)</label>
+          <button class="go" data-a="publish_ec">publish (erasure coded)</button>
+          <button data-a="ec_spread">spread fragments</button>
+          <button class="danger" data-a="ec_kill_and_prove">lose 2 holders &amp; read anyway</button>
+        </div>
+        <div id="ec-out" class="mono" style="font-size:var(--fs-body);margin:-2px 0 9px"></div>
+        <div class="row">
+          <label>capacity</label>
+          <button class="go" data-a="overcommit">hold more than it can store</button>
+        </div>
+        <div id="oc-out" class="mono" style="font-size:var(--fs-body);margin:-2px 0 9px"></div>
+        <div class="row">
+          <label>time travel</label>
+          <button class="go" data-a="snapshot">snapshot the cluster</button>
+          <button class="danger" data-a="vandalise">encrypt every file</button>
+          <button class="go" data-a="restore">restore from snapshot</button>
+          <button data-a="consistency">all nodes identical?</button>
+        </div>
+        <div id="snap-out" class="mono" style="font-size:var(--fs-body);margin:-2px 0 9px"></div>
         <div class="grid" id="tiles"></div>
       </div>
     </div>
 
+  </section>
+
+  <section>
+    <div class="panel">
+      <h2>Files <span class="right" id="file-count"></span></h2>
+      <table>
+        <thead><tr><th>path</th><th class="num">size</th><th class="num">manifest</th>
+          <th style="width:34%">materialised across cluster</th></tr></thead>
+        <tbody id="files"></tbody>
+      </table>
+      <div class="hint">A file is <em>present</em> on every node the moment its manifest
+        lands. The bar shows how many chunks have actually been pulled — which for most
+        files, most of the time, is deliberately not all of them.</div>
+    </div>
+
+
+
     <div class="panel" style="margin-top:14px">
-      <h2>Events</h2>
+      <h2>Event log <span class="right" id="log-count"></span></h2>
+      <div class="logbar">
+        <select id="log-filter"><option value="">all kinds</option></select>
+        <select id="log-node"><option value="">all nodes</option></select>
+        <select id="log-level">
+          <option value="">all levels</option>
+          <option value="error">errors only</option>
+          <option value="warn">warnings +</option>
+          <option value="good">milestones</option>
+        </select>
+        <input id="log-search" type="text" placeholder="search text…">
+        <button id="log-pause" class="logbtn">pause</button>
+        <button id="log-copy" class="logbtn">copy</button>
+        <label class="logchk"><input type="checkbox" id="log-time" checked> time</label>
+      </div>
+      <div class="logstats" id="log-stats"></div>
       <div id="log"></div>
     </div>
   </section>
+
+  <div class="panel full">
+      <h2>System Internals <span class="right toggle" id="internals-toggle">hide ▲</span></h2>
+      <div id="internals-body">
+        <div class="internals-wrap body">
+          <table>
+            <thead><tr><th>node</th><th>rack</th><th>policy</th><th class="num">peers</th>
+              <th class="num">chunks</th><th class="num">stored</th><th>disk vs presented</th>
+              <th class="num">dedup</th>
+              <th>merkle root</th><th class="num">sched</th><th>chaos</th></tr></thead>
+            <tbody id="internals"></tbody>
+          </table>
+        </div>
+        <div class="hint">Every counter every node reports, summed cluster-wide. This list
+          grows automatically as the codebase grows &mdash; nothing here is hand-picked.</div>
+        <div class="metrics" id="metrics"></div>
+      </div>
+    </div>
 </main>
 
 <script>
 "use strict";
 const $ = s => document.querySelector(s);
 let STATE = null, FOCUS = null, PICKED = null, SEEN = new Set();
+let ALL_EVENTS = [], KNOWN_KINDS = new Set();
+let LOG_PAUSED = false, LAST_SHOWN = [];
 
 const fmt = n => {
   if (n === undefined || n === null) return "–";
@@ -213,6 +342,8 @@ function render(){
   $("#s-resident").textContent = focus ? (focus.RESIDENT||0) + " / " + nodes.length : "–";
   const dr = nodes.length ? nodes.reduce((a,n)=>a+(n.dedup_ratio||1),0)/nodes.length : 1;
   $("#s-dedup").textContent = dr.toFixed(2) + "x";
+  $("#s-gossip").textContent = fmtNum(sum.totals.gossip_rounds);
+  $("#s-ec").textContent = fmtNum(sum.totals.ec_reconstructions);
   $("#focus-label").textContent = FOCUS || "no file selected";
   $("#file-count").textContent = sum.files.length + " tracked";
 
@@ -220,12 +351,17 @@ function render(){
   drawFiles(sum.files, nodes.length);
   drawTiles(sum.totals, nodes);
   drawPicker(nodes);
-  drawLog(sum.events);
+  drawInternals(sum.nodes_summary || []);
+  drawMetrics(sum.totals);
+  ALL_EVENTS = sum.events;
+  drawLog();
 }
+
+const fmtNum = n => (n === undefined || n === null) ? "–" : Number(n).toLocaleString();
 
 function drawRing(nodes, path){
   const W = 640, H = 460, cx = W/2, cy = H/2;
-  const R = Math.min(cx, cy) - 46;
+  const R = Math.min(cx, cy) - 74;   // room for the larger node labels
   const n = nodes.length || 1;
   const pos = nodes.map((_, i) => {
     const a = (i / n) * Math.PI * 2 - Math.PI/2;
@@ -257,8 +393,11 @@ function drawRing(nodes, path){
       ? `<circle cx="${x}" cy="${y}" r="${r+5}" fill="none" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3"/>` : "";
     svg += ring + `<circle class="node" data-node="${nd.node}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorFor(st)}" stroke="${PICKED===nd.node?'#fff':'#0b0e14'}" stroke-width="${PICKED===nd.node?2:1}"><title>${nd.node} — ${st}${f?` (${f.have}/${f.chunks} chunks)`:""}</title></circle>`;
     if (n <= 40) {
-      const lx = cx + (R+22)*Math.cos((i/n)*Math.PI*2 - Math.PI/2);
-      const ly = cy + (R+22)*Math.sin((i/n)*Math.PI*2 - Math.PI/2);
+      // Far enough out that a 4-character label clears the widest node
+      // circle (r max 15) at the left and right of the ring, where the text
+      // extends along the radius rather than across it.
+      const lx = cx + (R+40)*Math.cos((i/n)*Math.PI*2 - Math.PI/2);
+      const ly = cy + (R+40)*Math.sin((i/n)*Math.PI*2 - Math.PI/2);
       svg += `<text class="node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${nd.node}</text>`;
     }
   });
@@ -266,42 +405,113 @@ function drawRing(nodes, path){
   // centre readout
   const res = nodes.filter(nd => stateOf(nd,path) === "RESIDENT").length;
   const kn  = nodes.filter(nd => nd.files && nd.files[path]).length;
-  svg += `<text x="${cx}" y="${cy-8}" text-anchor="middle" fill="var(--ink)" font-size="26" font-weight="600">${kn}/${nodes.length}</text>`;
-  svg += `<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--faint)" font-size="10.5" letter-spacing="1.2">MANIFEST PRESENT</text>`;
-  svg += `<text x="${cx}" y="${cy+34}" text-anchor="middle" fill="var(--resident)" font-size="12">${res} fully resident</text>`;
+  svg += `<text x="${cx}" y="${cy-10}" text-anchor="middle" fill="var(--ink)" font-size="38" font-weight="600">${kn}/${nodes.length}</text>`;
+  svg += `<text x="${cx}" y="${cy+16}" text-anchor="middle" fill="var(--dim)" font-size="16" letter-spacing="1.4">MANIFEST PRESENT</text>`;
+  svg += `<text x="${cx}" y="${cy+42}" text-anchor="middle" fill="var(--resident)" font-size="17">${res} fully resident</text>`;
 
   $("#ring").innerHTML = svg;
   $("#ring").querySelectorAll("circle.node").forEach(c =>
     c.addEventListener("click", () => { PICKED = c.dataset.node; $("#node-pick").value = PICKED; render(); }));
 }
 
+// Durability: how many machines can be lost right now with this file intact.
+// Worst case, not average -- the seeding window as an instrument rather than
+// a caveat in the appendix.
+function durBar(f){
+  const d = f.durability;
+  if (!d) return "";
+  const s = d.survives;
+  const pips = [0,1,2].map(i =>
+    `<i class="${s > i ? 'on' : (s < 0 && i === 0 ? 'risk' : '')}"></i>`).join("");
+  const label = s < 0 ? "not fully held anywhere"
+    : s === 0 ? "survives 0 losses — still seeding"
+    : `survives losing ${s} node${s>1?'s':''}`;
+  return `<div class="dur">${pips}<span>${label}${d.coded?' · coded':''}</span></div>`;
+}
+
 function drawFiles(files, nNodes){
   $("#files").innerHTML = files.map(f => {
     const pct = f.want ? Math.round(100*f.have/f.want) : 0;
+    const ec = f.ec ? `<span class="ec-chip">EC k=${f.ec.k} m=${f.ec.m} · ${f.ec.overhead}x ·
+      survives losing ${f.ec.tolerates}</span>` : "";
+    const fragLine = f.ec ? `<div class="mono" style="font-size:var(--fs-micro)">fragments spread `
+      + `beyond the publisher: ${f.ec_fragments_elsewhere} (of ${f.ec_fragments_total} per `
+      + `holder) &mdash; origin still holds ${f.ec_fragments_on_origin}/${f.ec_fragments_total}</div>` : "";
     return `<tr class="file ${f.path===FOCUS?'sel':''}" data-path="${f.path}">
-      <td>${f.path}<div class="mono" style="font-size:10.5px">${f.RESIDENT||0} resident · ${f.PARTIAL||0} partial · ${f.PHANTOM||0} phantom</div></td>
+      <td>${f.path}${ec}<div class="mono" style="font-size:var(--fs-micro)">${f.RESIDENT||0} resident · ${f.PARTIAL||0} partial · ${f.PHANTOM||0} phantom</div>${fragLine}${durBar(f)}</td>
       <td class="num">${fmt(f.size)}</td>
       <td class="num mono">${fmt(f.manifest_bytes)}</td>
       <td><div class="bar"><div style="width:${pct}%"></div></div>
-          <span class="mono" style="font-size:10.5px">${pct}% of chunks pulled</span></td></tr>`;
+          <span class="mono" style="font-size:var(--fs-micro)">${pct}% of chunks pulled</span></td></tr>`;
   }).join("") || `<tr><td colspan="4" class="mono" style="padding:14px">nothing published yet — use the demo buttons</td></tr>`;
   $("#files").querySelectorAll("tr.file").forEach(tr =>
     tr.addEventListener("click", () => { FOCUS = tr.dataset.path; render(); }));
 }
 
 function drawTiles(t, nodes){
-  const gossip = t.gossip_rounds || 0;
   const tiles = [
     ["manifests received", t.manifests_received || 0],
     ["chunks served", t.chunks_served || 0],
     ["bytes fetched", fmt(t.bytes_fetched)],
     ["read faults", t.reads_faulted || 0],
-    ["gossip rounds", gossip],
+    ["gossip rounds", t.gossip_rounds || 0],
     ["conflicts kept", t.conflicts || 0],
     ["corruption healed", t.corruption_detected || 0],
+    ["ec reconstructions", t.ec_reconstructions || 0],
+    ["ec fallbacks triggered", t.ec_fallback_triggered || 0],
   ];
   $("#tiles").innerHTML = tiles.map(([k,v]) =>
     `<div class="tile"><b>${v}</b><span>${k}</span></div>`).join("");
+}
+
+// "Presented" is what the node's files add up to; "stored" is what is on its
+// disk. When the first is bigger than the second, the node is holding more
+// file than it has room for -- which content addressing makes safe.
+function ocCell(oc){
+  if (!oc || !oc.presented_bytes) return `<span class="mono" style="color:var(--faint)">–</span>`;
+  const cap = oc.capacity_bytes;
+  const pct = cap ? Math.min(100, Math.round(100*oc.physical_bytes/cap)) : 0;
+  const bar = cap ? `<div class="oc-bar"><div class="${oc.over_budget?'over':''}"
+    style="width:${pct}%"></div></div>` : "";
+  const capTxt = cap ? ` / cap ${fmt(cap)}` : "";
+  const ratio = oc.ratio === null || oc.ratio === undefined
+    ? `<b style="color:var(--resident)" title="holds none of it">∞</b>`
+    : `<b style="color:var(--partial)">${oc.ratio}x</b>`;
+  return `<span class="mono" style="font-size:var(--fs-micro)">${fmt(oc.physical_bytes)}${capTxt}
+    → presents ${fmt(oc.presented_bytes)} ${ratio}</span>${bar}`;
+}
+
+function drawInternals(nodes){
+  $("#internals").innerHTML = nodes.map(n => {
+    const chaos = n.chaos || {};
+    const flags = [];
+    if (chaos.killed) flags.push("killed");
+    if ((chaos.partitioned||[]).length) flags.push(`partitioned x${chaos.partitioned.length}`);
+    if (chaos.latency_ms) flags.push(`+${chaos.latency_ms}ms`);
+    if (chaos.throughput_bps) flags.push(`${fmt(chaos.throughput_bps)}/s cap`);
+    if (chaos.drop_rate) flags.push(`drop ${Math.round(chaos.drop_rate*100)}%`);
+    if (chaos.byzantine) flags.push("BYZANTINE");
+    const sched = n.scheduler || {};
+    return `<tr>
+      <td class="${n.up?'up':'down'} mono">${n.node}${n.up?'':' ✕'}</td>
+      <td class="mono">${n.rack||''}</td>
+      <td class="mono">${n.policy||''}</td>
+      <td class="num">${n.alive_peers}</td>
+      <td class="num">${n.chunks}</td>
+      <td class="num">${fmt(n.store_bytes)}</td>
+      <td>${ocCell(n.overcommit)}</td>
+      <td class="num">${(n.dedup_ratio||1).toFixed(2)}x</td>
+      <td class="mono" style="font-size:var(--fs-micro)">${n.merkle_root||''}</td>
+      <td class="num">${sched.inflight||0}/${sched.busy_peers||0}</td>
+      <td class="mono" style="font-size:var(--fs-micro);color:${flags.length?'var(--warn)':'var(--faint)'}">${flags.join(', ')||'clean'}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="11" class="mono" style="padding:10px">no nodes reporting</td></tr>`;
+}
+
+function drawMetrics(totals){
+  $("#metrics").innerHTML = Object.entries(totals).map(([k,v]) =>
+    `<div class="metric"><span title="${k}">${k.replace(/_/g,' ')}</span><b>${
+      typeof v === 'number' && v > 100000 ? fmt(v) : fmtNum(v)}</b></div>`).join("");
 }
 
 function drawPicker(nodes){
@@ -316,24 +526,103 @@ function drawPicker(nodes){
   $("#target").textContent = PICKED || "—";
 }
 
-function drawLog(events){
-  const el = $("#log");
-  const fresh = events.filter(e => !SEEN.has(e.t + e.node + e.text)).reverse();
-  fresh.forEach(e => {
-    SEEN.add(e.t + e.node + e.text);
-    const d = document.createElement("div");
-    d.className = "k-" + e.kind;
-    d.innerHTML = `<span class="who">${e.node}</span><span class="kind">${e.kind}</span><span>${e.text}</span>`;
-    el.prepend(d);
-  });
-  while (el.children.length > 220) el.lastChild.remove();
-  if (SEEN.size > 3000) SEEN = new Set();
+const esc = s => String(s === undefined || s === null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+const clock = t => {
+  const d = new Date(t * 1000);
+  return d.toTimeString().slice(0,8) + "." +
+         String(d.getMilliseconds()).padStart(3,"0");
+};
+
+function syncOptions(sel, values, allLabel){
+  const sig = values.join(",");
+  if (sel.dataset.sig === sig) return;
+  sel.dataset.sig = sig;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${allLabel}</option>` +
+    values.map(v => `<option>${esc(v)}</option>`).join("");
+  sel.value = values.includes(cur) ? cur : "";
+}
+
+// The log is what shows the work, so it is filterable along every axis the
+// events actually carry rather than being a scrolling wall nobody can read.
+function drawLog(){
+  if (LOG_PAUSED) return;
+  const events = ALL_EVENTS;
+  events.forEach(e => { if (e.kind) KNOWN_KINDS.add(e.kind); });
+  syncOptions($("#log-filter"), [...KNOWN_KINDS].sort(), "all kinds");
+  syncOptions($("#log-node"),
+    [...new Set(events.map(e => e.node).filter(Boolean))].sort(), "all nodes");
+
+  const kind = $("#log-filter").value;
+  const node = $("#log-node").value;
+  const level = $("#log-level").value;
+  const q = ($("#log-search").value || "").toLowerCase();
+  const showTime = $("#log-time").checked;
+  const rank = {error:3, warn:2, good:1, info:0};
+
+  const shown = events.filter(e =>
+    (!kind  || e.kind === kind) &&
+    (!node  || e.node === node) &&
+    (!level || (level === "warn" ? rank[e.level||"info"] >= 2 : (e.level||"info") === level)) &&
+    (!q || (e.text||"").toLowerCase().includes(q) || (e.node||"").toLowerCase().includes(q)));
+
+  const byLevel = {};
+  events.forEach(e => { const l = e.level || "info"; byLevel[l] = (byLevel[l]||0)+1; });
+  $("#log-stats").innerHTML = ["error","warn","good","info"]
+    .filter(l => byLevel[l])
+    .map(l => `<span class="logstat" data-level="${l}">${l} <b>${byLevel[l]}</b></span>`).join("")
+    + `<span class="logstat" data-level="">all <b>${events.length}</b></span>`;
+  $("#log-stats").querySelectorAll(".logstat").forEach(s =>
+    s.addEventListener("click", () => { $("#log-level").value = s.dataset.level; drawLog(); }));
+
+  const filtered = (kind || node || level || q);
+  $("#log-count").textContent = filtered
+    ? `${shown.length} of ${events.length} events`
+    : `${events.length} events retained`;
+
+  $("#log").innerHTML = shown.map(e =>
+    `<div class="ev k-${esc(e.kind)} lvl-${esc(e.level||"info")}">` +
+    (showTime ? `<span class="ts">${clock(e.t)}</span>` : "") +
+    `<span class="who">${esc(e.node)}</span>` +
+    `<span class="kind">${esc(e.kind)}</span>` +
+    `<span class="msg">${esc(e.text)}</span></div>`).join("")
+    || `<div class="ev"><span class="msg">no events match this filter</span></div>`;
+  LAST_SHOWN = shown;
 }
 
 async function chaos(node, action, args){
   await fetch("/api/chaos", {method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({node, action, args: args||{}})});
 }
+
+$("#internals-toggle").addEventListener("click", () => {
+  const body = $("#internals-body");
+  body.hidden = !body.hidden;
+  $("#internals-toggle").textContent = body.hidden ? "show ▾" : "hide ▲";
+});
+["#log-filter","#log-node","#log-level"].forEach(s =>
+  $(s).addEventListener("change", drawLog));
+$("#log-search").addEventListener("input", drawLog);
+$("#log-time").addEventListener("change", drawLog);
+$("#log-pause").addEventListener("click", () => {
+  LOG_PAUSED = !LOG_PAUSED;
+  $("#log-pause").textContent = LOG_PAUSED ? "resume" : "pause";
+  $("#log-pause").classList.toggle("on", LOG_PAUSED);
+  if (!LOG_PAUSED) drawLog();
+});
+$("#log-copy").addEventListener("click", async () => {
+  const text = LAST_SHOWN.map(e =>
+    `${clock(e.t)}  ${e.node}  ${e.kind}  ${e.text}`).join("\n");
+  try{
+    await navigator.clipboard.writeText(text);
+    $("#log-copy").textContent = "copied";
+  }catch(err){
+    $("#log-copy").textContent = "copy failed";
+  }
+  setTimeout(() => { $("#log-copy").textContent = "copy"; }, 1200);
+});
 
 document.addEventListener("click", async ev => {
   const b = ev.target.closest("button"); if (!b) return;
@@ -357,6 +646,8 @@ document.addEventListener("click", async ev => {
         await chaos(PICKED, "throttle", {bps: +b.dataset.bps});
       } else if (c === "drop"){
         await chaos(PICKED, "drop", {rate: +b.dataset.rate});
+      } else if (c === "byzantine"){
+        await chaos(PICKED, "byzantine", {on: true});
       } else if (c === "corrupt"){
         await fetch("/api/action", {method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({action:"corrupt", node: PICKED, path: FOCUS})});
@@ -384,6 +675,78 @@ document.addEventListener("click", async ev => {
               + `<div style="color:var(--resident)">found using manifests only &mdash; `
               + `${j.result.bytes_moved_to_find_it} bytes of file data moved</div>`
           : `<span style="color:var(--resident)">no drift: every node agrees</span>`;
+      }
+      if (b.dataset.a === "publish_ec"){
+        const el = $("#ec-out");
+        if (j.ok){
+          const r2 = j.result;
+          el.innerHTML = `<div style="color:var(--resident)">published ${fmt(r2.size)} as `
+            + `${r2.fragments} fragments (k=${r2.k}, m=${r2.m}, ${r2.overhead}x storage) `
+            + `&mdash; present on all nodes in ${r2.manifest_everywhere_s}s. `
+            + `Publisher stores <b>zero</b> bytes of the assembled file, only fragments.</div>`;
+          FOCUS = r2.path;
+        } else {
+          el.innerHTML = `<span style="color:var(--dead)">${j.reason}</span>`;
+        }
+      }
+      if (b.dataset.a === "ec_spread"){
+        $("#ec-out").innerHTML = j.ok
+          ? `<span style="color:var(--faint)">asked ${j.result.requested} other node(s) to `
+            + `materialise &mdash; watch fragments spread in the ring and the event log</span>`
+          : `<span style="color:var(--dead)">${j.reason}</span>`;
+      }
+      if (b.dataset.a === "ec_kill_and_prove"){
+        const el = $("#ec-out");
+        if (j.ok){
+          const r2 = j.result;
+          el.innerHTML = `<div style="color:var(--resident)">killed <b>${r2.killed.join(", ") || "(none yet — spread fragments first)"}</b> `
+            + `(tolerating up to ${r2.m_tolerated}) &mdash; node <b>${r2.reader}</b> then read `
+            + `${r2.bytes_read} bytes in ${r2.read_s}s by reconstructing from survivors. ${r2.note}</div>`;
+        } else {
+          el.innerHTML = `<span style="color:var(--dead)">${j.reason}</span>`;
+        }
+      }
+      if (["snapshot","vandalise","restore","consistency"].includes(b.dataset.a)){
+        const el = $("#snap-out");
+        if (!j.ok){
+          el.innerHTML = `<span style="color:var(--dead)">${j.reason}</span>`;
+        } else if (b.dataset.a === "snapshot"){
+          const r = j.result;
+          el.innerHTML = `<div style="color:var(--resident)">snapshot <b>${r.label}</b> — `
+            + `root <b>${r.root}</b> covers ${r.files} file(s). Keeping it costs `
+            + `<b>${r.bytes_to_keep} bytes</b>. Cluster agrees: <b>${r.cluster_agrees}</b>.</div>`;
+        } else if (b.dataset.a === "vandalise"){
+          el.innerHTML = `<div style="color:var(--dead)">overwrote `
+            + `<b>${j.result.vandalised.length}</b> file(s) with garbage — `
+            + `${j.result.vandalised.join(", ")}</div>`;
+        } else if (b.dataset.a === "restore"){
+          const r = j.result;
+          el.innerHTML = `<div style="color:var(--resident)">restored `
+            + `<b>${r.restored}</b> file(s) to snapshot <b>${r.label}</b> in `
+            + `<b>${r.elapsed_s}s</b>. Namespace root now <b>${r.root_now}</b>, `
+            + `target was <b>${r.root_target}</b> — match: <b>${r.matches}</b>, `
+            + `whole cluster agrees: <b>${r.cluster_agrees}</b>.</div>`;
+        } else {
+          const r = j.result;
+          el.innerHTML = r.agreed
+            ? `<div style="color:var(--resident)">all live nodes report the same 32-byte
+               namespace root <b>${r.majority}</b> — one comparison, not an audit.</div>`
+            : `<div style="color:var(--warn)">roots differ; outliers: <b>${r.outliers.join(", ")}</b></div>`;
+        }
+      }
+      if (b.dataset.a === "overcommit"){
+        const el = $("#oc-out");
+        if (j.ok){
+          const r3 = j.result;
+          el.innerHTML = `<div style="color:var(--resident)">node <b>${r3.node}</b> has a `
+            + `<b>${fmt(r3.cap)}</b> budget and stores <b>${fmt(r3.stored_bytes)}</b> — `
+            + `yet presents <b>${fmt(r3.presented_bytes)}</b> across ${r3.files_present} `
+            + `file(s): <b>${r3.ratio === null ? "∞" : r3.ratio + "x"}</b> more than it holds. Evicted `
+            + `${r3.evicted_chunks} chunk(s) (${fmt(r3.evicted_bytes)}), then re-read `
+            + `<b>${fmt(r3.bytes_verified)}</b> byte-exact in ${r3.elapsed_s}s.</div>`;
+        } else {
+          el.innerHTML = `<span style="color:var(--dead)">${j.reason}</span>`;
+        }
       }
     } finally { b.disabled = false; }
   }

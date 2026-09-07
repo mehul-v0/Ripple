@@ -1,8 +1,21 @@
+# Python
 __pycache__/
 *.py[cod]
+
+# Cluster data written at runtime by demo.py and by each node
 .ripple/
 .ripple-demo/
 .ripple-cluster-*/
-results/*.log
-docker/docker-compose.yml
+
+# Kept local, not shipped: tests, benchmarks, docs, generated results and
+# presentation material. None of it is needed to run the system.
+tests/
+bench/
+docs/
+results/
+docker/
+scratchpad/
+reproduce.py
+*.pptx
+
 .DS_Store

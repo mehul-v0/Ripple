@@ -1,55 +1,57 @@
-"""Chunk fetch scheduling: which chunk to pull, and from whom.
-
-Rarest-first ordering with a per-node tiebreak salt. Rarity is estimated from
-peers' Bloom summaries, so a false positive can misorder two chunks of similar
-rarity but can never cause an incorrect transfer.
-
-docs/ARCHITECTURE.md (L3) covers why the salt matters and why super-seeding is
-off by default.
-"""
-
 from __future__ import annotations
 
 import random
 import threading
+import time
 import zlib
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from .bloom import BloomFilter
 from .peers import Peer
 
+DENY_SECONDS = 20.0
+
 
 class ChunkAvailability:
-    """Who is believed to hold what, from gossiped Bloom summaries."""
 
-    def __init__(self):
+    def __init__(self, deny_seconds: float = DENY_SECONDS):
         self._lock = threading.RLock()
-        self.filters: Dict[str, BloomFilter] = {}   # node_id -> summary
-        self.exact: Dict[str, set] = {}             # node_id -> confirmed hashes
+        self.filters: Dict[str, BloomFilter] = {}
+        self.exact: Dict[str, set] = {}
+        self.denied: Dict[str, Dict[str, float]] = {}
+        self.deny_seconds = deny_seconds
 
     def update(self, node_id: str, bf: BloomFilter) -> None:
         with self._lock:
             self.filters[node_id] = bf
 
     def confirm(self, node_id: str, chunk: str, present: bool) -> None:
-        """Record a definite answer, overriding the Bloom estimate."""
         with self._lock:
             s = self.exact.setdefault(node_id, set())
+            d = self.denied.setdefault(node_id, {})
             if present:
                 s.add(chunk)
+                d.pop(chunk, None)
             else:
                 s.discard(chunk)
-                self.filters.setdefault(node_id, BloomFilter.for_items(1))
+                d[chunk] = time.time() + self.deny_seconds
 
     def forget(self, node_id: str) -> None:
         with self._lock:
             self.filters.pop(node_id, None)
             self.exact.pop(node_id, None)
+            self.denied.pop(node_id, None)
 
     def holders(self, chunk: str, candidates: Iterable[Peer]) -> List[Peer]:
+        now = time.time()
         with self._lock:
             out = []
             for p in candidates:
+                expiry = self.denied.get(p.node_id, {}).get(chunk)
+                if expiry is not None:
+                    if expiry > now:
+                        continue
+                    self.denied[p.node_id].pop(chunk, None)
                 if chunk in self.exact.get(p.node_id, ()):
                     out.append(p)
                     continue
@@ -78,10 +80,6 @@ class TransferPlan:
 
 
 class Scheduler:
-    """Picks (chunk, peer) pairs to fetch.
-
-    super_seed and salt are switchable so bench/benchmark.py can ablate them.
-    """
 
     def __init__(self, availability: ChunkAvailability, max_per_peer: int = 4,
                  window: int = 128, seed: int = 0, super_seed: bool = False,
@@ -94,28 +92,19 @@ class Scheduler:
         self._rng = random.Random(seed or None)
         self._salt = self._rng.getrandbits(32) if salt else 0
         self._lock = threading.RLock()
-        self.inflight: Dict[str, str] = {}       # chunk -> node_id serving it
-        self.peer_load: Dict[str, int] = {}      # node_id -> outstanding requests
+        self.inflight: Dict[str, str] = {}
+        self.peer_load: Dict[str, int] = {}
 
     def plan(self, wanted: List[str], peers: List[Peer], sorter, limit: int = 16,
              origins: frozenset = frozenset()) -> List[TransferPlan]:
-        """Choose up to `limit` (chunk, peer) pairs to fetch next.
-
-        `sorter` ranks the holders of a chunk; injected so callers can express
-        their own topology preferences. `origins` names the publishing nodes,
-        and is consulted only when super_seed is on.
-        """
         with self._lock:
             todo = [c for c in wanted if c not in self.inflight]
         if not todo:
             return []
 
-        # Rank a bounded window; ranking every outstanding chunk would cost
-        # O(missing x peers) per pass and dominate the transfer itself.
         if len(todo) > self.window:
             todo = self._rng.sample(todo, self.window)
 
-        # Resolve holders once: a Bloom test per peer is the expensive step.
         holders_of = {c: self.avail.holders(c, peers) for c in todo}
         rarity = {c: len(holders_of[c]) for c in todo}
 
@@ -129,13 +118,10 @@ class Scheduler:
             else:
                 from_swarm.append(c)
 
-        # Rarest first, ties broken per node. Without the salt every node walks an
-        # identical order, acquires the same chunks, and has nothing to trade.
         if self.salt_enabled:
             salt = self._salt
             key = lambda c: (rarity[c], zlib.crc32(c.encode(), salt))
         else:
-            # ablation: node-independent ordering
             key = lambda c: (rarity[c], c)
         from_swarm.sort(key=key)
         from_origin.sort(key=key)
@@ -164,7 +150,6 @@ class Scheduler:
             self.avail.confirm(node_id, chunk, True)
 
     def release_peer(self, node_id: str) -> None:
-        """Requeue everything outstanding against a dead peer."""
         with self._lock:
             for c, n in list(self.inflight.items()):
                 if n == node_id:

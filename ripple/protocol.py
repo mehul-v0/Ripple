@@ -1,11 +1,3 @@
-"""Wire protocol: length-prefixed frames over TCP.
-
-    magic(4) | header_len(4) | payload_len(4) | JSON header | raw payload
-
-Two lengths so chunk bytes are not base64'd into JSON, which would cost 33% on
-the largest category of traffic. Connections are long-lived and pooled.
-"""
-
 from __future__ import annotations
 
 import json
@@ -19,18 +11,17 @@ HDR = struct.Struct("!4sII")
 MAX_HEADER = 8 << 20
 MAX_PAYLOAD = 128 << 20
 
-# message types
-HELLO = "hello"                    # join: introduce self, receive peer table
-GOSSIP = "gossip"                  # membership + manifest advertisements
-MANIFEST_GET = "manifest_get"      # pull a manifest by path or digest
-HAVE_GET = "have_get"              # request a Bloom summary of held chunks
-CHUNK_GET = "chunk_get"            # request one chunk by hash
-CHUNK_PROBE = "chunk_probe"        # exact "do you hold these?" (Bloom refinement)
-PING = "ping"                      # RTT probe for latency-aware peer selection
-STATE_GET = "state_get"            # dashboard aggregation
-MERKLE_GET = "merkle_get"          # anti-entropy: level hashes
-BUCKET_GET = "bucket_get"          # anti-entropy: keys inside a differing bucket
-CHAOS = "chaos"                    # fault injection control
+HELLO = "hello"
+GOSSIP = "gossip"
+MANIFEST_GET = "manifest_get"
+HAVE_GET = "have_get"
+CHUNK_GET = "chunk_get"
+CHUNK_PROBE = "chunk_probe"
+PING = "ping"
+STATE_GET = "state_get"
+MERKLE_GET = "merkle_get"
+BUCKET_GET = "bucket_get"
+CHAOS = "chaos"
 
 
 class ProtocolError(Exception):
@@ -60,8 +51,6 @@ def read_frame(sock: socket.socket) -> Tuple[dict, bytes]:
     magic, hlen, plen = HDR.unpack(_recv_exact(sock, HDR.size))
     if magic != MAGIC:
         raise ProtocolError("bad magic %r" % (magic,))
-    # Bound both lengths before allocating: an oversized frame from a confused or
-    # hostile peer must not exhaust our memory.
     if hlen > MAX_HEADER or plen > MAX_PAYLOAD:
         raise ProtocolError("frame too large (%d/%d)" % (hlen, plen))
     head = json.loads(_recv_exact(sock, hlen))
@@ -75,11 +64,6 @@ def send_frame(sock: socket.socket, msg: dict, payload: bytes = b"") -> int:
 
 
 class PeerClient:
-    """Pooled client for one remote node.
-
-    One connection per in-flight request, so a chunk fetch and a gossip round
-    do not interleave frames on the same socket.
-    """
 
     def __init__(self, addr: Tuple[str, int], timeout: float = 5.0, max_conns: int = 4):
         self.addr = addr
@@ -108,7 +92,6 @@ class PeerClient:
             pass
 
     def request(self, msg: dict, payload: bytes = b"") -> Tuple[dict, bytes, int, int]:
-        """Send one request; return (header, payload, bytes_sent, bytes_recv)."""
         sock = self._acquire()
         try:
             sent = send_frame(sock, msg, payload)

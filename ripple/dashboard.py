@@ -1,13 +1,8 @@
-"""Live cluster dashboard and chaos control surface.
-
-Serves one page that polls a JSON endpoint, either reading in-process
-RippleNode objects directly or asking remote peers over the Ripple protocol.
-"""
-
 from __future__ import annotations
 
 import json
 import os
+import socket
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,7 +15,6 @@ STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
 
 class ClusterView:
-    """Whatever the dashboard is looking at: local objects or remote peers."""
 
     def __init__(self, nodes: Optional[List] = None,
                  peers: Optional[List[Tuple[str, int]]] = None):
@@ -61,6 +55,35 @@ class ClusterView:
                 return n
         return None
 
+    def durability(self) -> Dict[str, dict]:
+        if not self.nodes:
+            return {}
+        live = [n for n in self.nodes if not n.chaos.killed]
+        out: Dict[str, dict] = {}
+        seen = set()
+        for n in live:
+            for m in n.manifests.all_current():
+                if m.path in seen:
+                    continue
+                seen.add(m.path)
+                out[m.path] = _durability_of(m, live)
+        return out
+
+    def consistency(self) -> dict:
+        roots: Dict[str, List[str]] = {}
+        for n in self.nodes:
+            if n.chaos.killed:
+                continue
+            roots.setdefault(n.namespace_root(), []).append(n.node_id)
+        if not roots:
+            return {"agreed": False, "roots": {}, "majority": "", "outliers": []}
+        majority = max(roots, key=lambda r: len(roots[r]))
+        return {"agreed": len(roots) == 1,
+                "roots": {r[:16]: sorted(v) for r, v in roots.items()},
+                "majority": majority[:16],
+                "outliers": sorted(n for r, v in roots.items()
+                                   if r != majority for n in v)}
+
     def chaos(self, node_id: str, action: str, args: dict) -> dict:
         node = self.find(node_id)
         if node is not None:
@@ -77,43 +100,114 @@ class ClusterView:
         return {"ok": False, "reason": "no such node %s" % node_id}
 
 
-def aggregate(states: List[dict]) -> dict:
-    """Roll per-node state up into the numbers the header shows."""
+def _durability_of(m, live) -> dict:
+    weakest = None
+    for chunk in m.chunks:
+        grp = (m.ec or {}).get(chunk)
+        if grp is None:
+            tolerated = sum(1 for n in live if n.store.has(chunk)) - 1
+        else:
+            k, frags = grp["k"], grp["frags"]
+            holders = [n for n in live if n.store.has(chunk)]
+            contrib = sorted(
+                (len([f for f in frags if n.store.has(f)]) for n in live
+                 if n not in holders), reverse=True)
+            killed = len(holders)
+            remaining = len([f for f in frags
+                             if any(n.store.has(f) for n in live
+                                    if n not in holders)])
+            for c in contrib:
+                if remaining - c < k:
+                    break
+                remaining -= c
+                killed += 1
+            tolerated = killed - 1
+        if weakest is None or tolerated < weakest:
+            weakest = tolerated
+    return {"survives": max(-1, weakest if weakest is not None else -1),
+            "chunks": len(m.chunks),
+            "coded": bool(m.ec)}
+
+
+_PRIORITY_COUNTERS = [
+    "bytes_served", "bytes_fetched", "chunks_served", "chunks_fetched",
+    "gossip_rounds", "gossip_ok", "msgs_sent", "msgs_recv",
+    "bytes_sent", "bytes_recv", "manifests_received", "reads_faulted",
+    "conflicts", "corruption_detected", "chunks_scrubbed",
+    "antientropy_clean", "antientropy_repairs",
+    "ec_files_published", "ec_reconstructions", "ec_fallback_triggered",
+    "ec_reconstruct_failed",
+    "upload_rejected", "chunk_busy", "chunk_misses", "fetch_errors",
+    "corrupt_received", "served_misses", "prefetch_queued", "cross_rack_bytes",
+]
+
+
+def aggregate(states: List[dict], durability: Optional[Dict[str, dict]] = None) -> dict:
     files: Dict[str, dict] = {}
-    totals = {"bytes_served": 0, "bytes_fetched": 0, "chunks_served": 0,
-              "chunks_fetched": 0, "conflicts": 0, "corruption_detected": 0,
-              "gossip_rounds": 0, "manifests_received": 0, "reads_faulted": 0,
-              "antientropy_repairs": 0, "upload_rejected": 0, "chunk_busy": 0}
+    seen_counters: Dict[str, int] = {}
     events = []
     alive = 0
+    nodes_summary = []
     for st in states:
-        if st.get("unreachable") or st.get("chaos", {}).get("killed"):
-            pass
-        else:
+        is_up = not (st.get("unreachable") or st.get("chaos", {}).get("killed"))
+        if is_up:
             alive += 1
-        for k in totals:
-            totals[k] += st.get("counters", {}).get(k, 0)
+        counters = st.get("counters", {})
+        for k, v in counters.items():
+            if isinstance(v, (int, float)):
+                seen_counters[k] = seen_counters.get(k, 0) + v
         events.extend(st.get("events", []))
+        nodes_summary.append({
+            "node": st.get("node"), "rack": st.get("rack"), "policy": st.get("policy"),
+            "up": is_up, "alive_peers": st.get("alive", 0),
+            "chunks": st.get("chunks", 0), "store_bytes": st.get("store_bytes", 0),
+            "logical_bytes": st.get("logical_bytes", 0),
+            "dedup_ratio": st.get("dedup_ratio", 1.0),
+            "merkle_root": st.get("merkle_root", ""),
+            "scheduler": st.get("scheduler", {}), "chaos": st.get("chaos", {}),
+            "uptime": counters.get("uptime", 0),
+            "overcommit": st.get("overcommit", {}),
+        })
         for path, info in st.get("files", {}).items():
             f = files.setdefault(path, {"path": path, "size": info["size"],
                                         "origin": info.get("origin", "?"),
                                         "chunks": info.get("chunks", 0),
                                         "manifest_bytes": info.get("manifest_bytes", 0),
                                         "digest": info.get("digest", ""),
+                                        "labels": info.get("labels", False),
                                         "PHANTOM": 0, "PARTIAL": 0, "RESIDENT": 0,
-                                        "have": 0, "want": 0})
+                                        "have": 0, "want": 0, "ec": None,
+                                        "ec_fragments_on_origin": 0,
+                                        "ec_fragments_elsewhere": 0,
+                                        "ec_fragments_total": 0})
             f[info["state"]] = f.get(info["state"], 0) + 1
             f["have"] += info.get("have", 0)
             f["want"] += info.get("chunks", 0)
+            if info.get("ec") and f["ec"] is None:
+                f["ec"] = {k: info["ec"][k] for k in ("k", "m", "overhead", "tolerates")}
+            if info.get("ec"):
+                present = info["ec"].get("fragments_present", 0)
+                if st.get("node") == info.get("origin"):
+                    f["ec_fragments_on_origin"] = present
+                else:
+                    f["ec_fragments_elsewhere"] += present
+                f["ec_fragments_total"] = max(f["ec_fragments_total"],
+                                              info["ec"].get("fragments_total", 0))
+    for path, d in (durability or {}).items():
+        if path in files:
+            files[path]["durability"] = d
     events.sort(key=lambda e: e.get("t", 0), reverse=True)
+    ordered = {k: seen_counters[k] for k in _PRIORITY_COUNTERS if k in seen_counters}
+    ordered.update({k: v for k, v in sorted(seen_counters.items()) if k not in ordered})
     return {"files": sorted(files.values(), key=lambda f: f["path"]),
-            "totals": totals, "alive": alive, "events": events[:60]}
+            "totals": ordered, "alive": alive, "events": events[:600],
+            "nodes_summary": nodes_summary}
 
 
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
-    def log_message(self, *a):  # keep the console readable during a demo
+    def log_message(self, *a):
         pass
 
     def _send(self, code: int, body: bytes, ctype: str) -> None:
@@ -138,8 +232,12 @@ class _Handler(BaseHTTPRequestHandler):
                 return self._send(500, b"dashboard.html missing", "text/plain")
         if u.path == "/api/state":
             states = view.states()
+            try:
+                dur = view.durability()
+            except Exception:
+                dur = {}
             return self._json({"t": time.time(), "nodes": states,
-                               "summary": aggregate(states)})
+                               "summary": aggregate(states, dur)})
         if u.path == "/api/versions":
             path = parse_qs(u.query).get("path", [""])[0]
             node = view.nodes[0] if view.nodes else None
@@ -177,14 +275,40 @@ class _Handler(BaseHTTPRequestHandler):
 class Dashboard:
     def __init__(self, view: ClusterView, port: int = 8080, host: str = "0.0.0.0"):
         self.view = view
-        self.server = ThreadingHTTPServer((host, port), _Handler)
+        self.server = self._bind(host, port)
         self.server.view = view
         self.server.actions: Dict[str, Callable] = {}
         self.server.daemon_threads = True
-        self.port = self.server.server_address[1]
+        self.host, self.port = self.server.server_address[:2]
+
+    @staticmethod
+    def _in_use(host: str, port: int) -> bool:
+        probe = socket.socket()
+        probe.settimeout(0.25)
+        try:
+            return probe.connect_ex(("127.0.0.1" if host in ("0.0.0.0", "") else host,
+                                     port)) == 0
+        except OSError:
+            return False
+        finally:
+            probe.close()
+
+    @classmethod
+    def _bind(cls, host: str, port: int) -> ThreadingHTTPServer:
+        attempts = []
+        hosts = [host, "127.0.0.1"] if host != "127.0.0.1" else [host]
+        for h in hosts:
+            for p in range(port, port + 12):
+                if cls._in_use(h, p):
+                    attempts.append("%s:%d (in use)" % (h, p))
+                    continue
+                try:
+                    return ThreadingHTTPServer((h, p), _Handler)
+                except OSError as e:
+                    attempts.append("%s:%d (%s)" % (h, p, e.__class__.__name__))
+        raise OSError("dashboard could not bind a port; tried %s" % ", ".join(attempts))
 
     def action(self, name: str, fn: Callable) -> None:
-        """Register a demo control (publish, edit, rollback, materialise...)."""
         self.server.actions[name] = fn
 
     def start(self) -> "Dashboard":

@@ -1,14 +1,3 @@
-"""Manifests: the unit Ripple synchronises.
-
-Everything about a file except its bytes -- name, size, mode, mtime, version
-vector, and the ordered chunk hashes. About 70 bytes per chunk, so manifest size
-tracks chunk count and chunk size scales with file size (chunker.PROFILES).
-
-Manifests are immutable and content-addressed by their own digest, so editing a
-file produces a new one and the old stays valid at negligible cost. That is what
-makes rollback a pointer swap.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -19,21 +8,22 @@ from typing import Dict, List, Optional
 
 from .versions import VV, bump
 
-# File materialisation states, in order.
-PHANTOM = "PHANTOM"    # manifest known, zero chunks local: the file "exists"
-PARTIAL = "PARTIAL"    # some chunks local, usually mid-read or mid-transfer
-RESIDENT = "RESIDENT"  # every chunk local, readable with no network at all
+PHANTOM = "PHANTOM"
+PARTIAL = "PARTIAL"
+RESIDENT = "RESIDENT"
 
 
 class Manifest:
     __slots__ = ("path", "size", "mode", "mtime", "chunks", "sizes", "vv",
-                 "origin", "created", "deleted", "note", "labels", "_digest")
+                 "origin", "created", "deleted", "note", "labels", "ec", "_digest",
+                 "_content_id")
 
     def __init__(self, path: str, size: int, chunks: List[str], sizes: List[int],
                  vv: VV, origin: str, mode: int = 0o644,
                  mtime: Optional[float] = None, created: Optional[float] = None,
                  deleted: bool = False, note: str = "",
-                 labels: Optional[List[str]] = None):
+                 labels: Optional[List[str]] = None,
+                 ec: Optional[Dict[str, dict]] = None):
         self.path = path
         self.size = size
         self.chunks = chunks
@@ -45,34 +35,39 @@ class Manifest:
         self.created = created if created is not None else time.time()
         self.deleted = deleted
         self.note = note
-        # One label per chunk when the file was split on its grammar (structured.py);
-        # None for ordinary content-defined chunks.
         self.labels = labels
+        self.ec = ec
         self._digest: Optional[str] = None
+        self._content_id: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {"path": self.path, "size": self.size, "mode": self.mode,
                 "mtime": self.mtime, "chunks": self.chunks, "sizes": self.sizes,
                 "vv": self.vv, "origin": self.origin, "created": self.created,
-                "deleted": self.deleted, "note": self.note, "labels": self.labels}
+                "deleted": self.deleted, "note": self.note, "labels": self.labels,
+                "ec": self.ec}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Manifest":
         return cls(d["path"], d["size"], d["chunks"], d["sizes"], d["vv"],
                    d["origin"], d.get("mode", 0o644), d.get("mtime"),
                    d.get("created"), d.get("deleted", False), d.get("note", ""),
-                   d.get("labels"))
+                   d.get("labels"), d.get("ec"))
 
     def digest(self) -> str:
-        """Stable content address for this version.
-
-        sort_keys matters: two nodes must derive the same digest for the same manifest
-        or Merkle comparison would report divergence that is not there.
-        """
         if self._digest is None:
             blob = json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":"))
             self._digest = hashlib.sha256(blob.encode()).hexdigest()
         return self._digest
+
+    def content_id(self) -> str:
+        if self._content_id is None:
+            blob = json.dumps({"path": self.path, "size": self.size,
+                               "chunks": self.chunks, "sizes": self.sizes,
+                               "labels": self.labels, "ec": self.ec},
+                              sort_keys=True, separators=(",", ":"))
+            self._content_id = hashlib.sha256(blob.encode()).hexdigest()
+        return self._content_id
 
     def nbytes(self) -> int:
         return len(json.dumps(self.to_dict(), separators=(",", ":")).encode())
@@ -93,10 +88,6 @@ class Manifest:
         return offs
 
     def chunks_for_range(self, offset: int, length: int) -> List[int]:
-        """Indices of the chunks a read of [offset, offset+length) touches.
-
-        Reading 4 KB of a 10 GB file fetches one chunk.
-        """
         if length <= 0:
             return []
         end = offset + length
@@ -110,7 +101,6 @@ class Manifest:
         return out
 
     def label_map(self) -> Dict[str, str]:
-        """label -> chunk hash for structured files; empty for opaque ones."""
         if not self.labels:
             return {}
         return {lab: h for lab, h in zip(self.labels, self.chunks)
@@ -125,19 +115,14 @@ class Manifest:
 
 
 class ManifestStore:
-    """Every version of every manifest, plus a pointer to the current one.
-
-    History is kept in full; a manifest is a few KB, so rollback is a pointer swap
-    rather than a restore.
-    """
 
     def __init__(self, root: str):
         self.dir = os.path.join(root, "manifests")
         os.makedirs(os.path.join(self.dir, "versions"), exist_ok=True)
-        self.refs: Dict[str, str] = {}             # path -> current digest
-        self.versions: Dict[str, Manifest] = {}    # digest -> manifest
-        self.history: Dict[str, List[str]] = {}    # path -> [digest, ...]
-        self.conflicts: Dict[str, List[str]] = {}  # path -> [losing digest, ...]
+        self.refs: Dict[str, str] = {}
+        self.versions: Dict[str, Manifest] = {}
+        self.history: Dict[str, List[str]] = {}
+        self.conflicts: Dict[str, List[str]] = {}
         self._load()
 
     def _load(self) -> None:

@@ -1,20 +1,22 @@
-"""Instrumentation.
-
-Every byte crossing a socket is counted where it crosses. `source_egress` --
-bytes sent by the node that published a file -- is counted separately from total
-traffic, because that is the quantity the scaling argument rests on.
-"""
-
 from __future__ import annotations
 
+import itertools
 import threading
 import time
 from collections import deque
 from typing import Deque, Dict, List, Optional
 
 
+_LEVELS = {
+    "error": "error", "conflict": "error", "byzantine": "error",
+    "heal": "warn", "repair": "warn", "evict": "warn", "member": "warn",
+    "erasure": "good", "rollback": "good", "durability": "good",
+}
+_SEQ = itertools.count(1)
+
+
 class Metrics:
-    def __init__(self, node_id: str, window: int = 400):
+    def __init__(self, node_id: str, window: int = 1200):
         self.node_id = node_id
         self.started = time.time()
         self._lock = threading.Lock()
@@ -39,8 +41,8 @@ class Metrics:
             self.timers.setdefault(name, []).append(seconds)
 
     def event(self, kind: str, text: str, **extra) -> None:
-        """Append to the rolling event log the dashboard renders."""
-        rec = {"t": time.time(), "kind": kind, "text": text, "node": self.node_id}
+        rec = {"t": time.time(), "kind": kind, "text": text, "node": self.node_id,
+               "level": _LEVELS.get(kind, "info"), "seq": next(_SEQ)}
         rec.update(extra)
         with self._lock:
             self.events.append(rec)

@@ -1,12 +1,3 @@
-"""Compact summaries of which chunks a node holds.
-
-Shipping full chunk-ID lists would make gossip traffic grow with cluster size x
-file size. A Bloom filter answers the same membership question in a fixed budget.
-
-False positives cost one wasted request, answered `chunk_miss`. False negatives
-would be a correctness bug, and Bloom filters cannot produce them.
-"""
-
 from __future__ import annotations
 
 import base64
@@ -15,8 +6,6 @@ import math
 from typing import Iterable, Optional
 
 
-# The scheduler tests the same chunk IDs against every peer's filter on every
-# planning pass, so the two 64-bit halves are cached rather than re-hashed.
 _HASH_CACHE: dict = {}
 _HASH_CACHE_MAX = 200_000
 
@@ -48,8 +37,6 @@ class BloomFilter:
         return cls(m, k)
 
     def _indices(self, item: str) -> Iterable[int]:
-        # Kirsch-Mitzenmacher double hashing: two hashes generate k indices with the
-        # same false-positive behaviour as k real ones, for one SHA-256.
         h1, h2 = _halves(item)
         m = self.m
         for i in range(self.k):

@@ -1,12 +1,3 @@
-"""Merkle anti-entropy over the manifest set.
-
-Gossip is best-effort, so a dropped message can leave a node missing a manifest
-with nothing to notice. Two identical nodes compare one root hash; two that
-differ descend only into disagreeing subtrees, so cost tracks the size of the
-divergence rather than the dataset. Cassandra and DynamoDB repair replicas the
-same way.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -24,7 +15,6 @@ def _h(*parts: str) -> str:
 
 
 class MerkleTree:
-    """A fixed-width Merkle tree over key -> value-hash pairs."""
 
     def __init__(self, leaves: int = 256):
         if leaves & (leaves - 1):
@@ -48,11 +38,9 @@ class MerkleTree:
         items = self.buckets[i]
         if not items:
             return EMPTY
-        # Sorted so the hash is independent of insertion order across nodes.
         return _h(*[x for k in sorted(items) for x in (k, items[k])])
 
     def levels(self) -> List[List[str]]:
-        """levels[0] is the leaf row; the last level holds the root."""
         if self._levels is not None:
             return self._levels
         level = [self._leaf_hash(i) for i in range(self.n_leaves)]
@@ -77,10 +65,6 @@ class MerkleTree:
 
 
 def differing_buckets(local: MerkleTree, remote_levels: List[List[str]]) -> List[int]:
-    """Descend both trees together, returning only the leaves that disagree.
-
-    O(differences * log leaves) rather than O(leaves).
-    """
     local_levels = local.levels()
     if not remote_levels or len(local_levels) != len(remote_levels):
         return list(range(local.n_leaves))

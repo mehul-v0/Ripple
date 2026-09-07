@@ -1,9 +1,3 @@
-"""Version vectors: telling a concurrent edit apart from a stale one.
-
-A wall-clock timestamp cannot distinguish "this copy is older" from "two nodes
-edited independently", and last-writer-wins silently destroys one of the two.
-"""
-
 from __future__ import annotations
 
 from typing import Dict
@@ -11,9 +5,9 @@ from typing import Dict
 VV = Dict[str, int]
 
 EQUAL = "equal"
-BEFORE = "before"          # local is strictly dominated by remote
-AFTER = "after"            # local strictly dominates remote
-CONCURRENT = "concurrent"  # genuine conflict: neither dominates
+BEFORE = "before"
+AFTER = "after"
+CONCURRENT = "concurrent"
 
 
 def bump(vv: VV, node_id: str) -> VV:
@@ -48,5 +42,4 @@ def compare(a: VV, b: VV) -> str:
 
 
 def descends(a: VV, b: VV) -> bool:
-    """True if a is at least as new as b on every node."""
     return compare(a, b) in (EQUAL, AFTER)

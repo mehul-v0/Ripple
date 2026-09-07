@@ -1,13 +1,3 @@
-"""Membership, failure detection, and latency awareness.
-
-Heartbeat-counter gossip rather than all-to-all probing, so detection cost per
-node stays constant as the cluster grows -- at 300 nodes all-to-all would be
-90,000 probes per interval.
-
-Each peer carries an EWMA of its RTT and a rack label, both of which feed peer
-selection.
-"""
-
 from __future__ import annotations
 
 import random
@@ -32,7 +22,7 @@ class Peer:
         self.heartbeat = 0
         self.last_seen = time.time()
         self.state = ALIVE
-        self.rtt = 0.05          # optimistic prior; corrected on first probe
+        self.rtt = 0.05
         self.have_count = 0
         self.failures = 0
 
@@ -41,8 +31,6 @@ class Peer:
         return (self.host, self.port)
 
     def observe_rtt(self, sample: float) -> None:
-        # EWMA: fast enough to notice an injected delay within a few probes, damped
-        # enough to ignore one slow scheduler.
         self.rtt = 0.75 * self.rtt + 0.25 * sample
 
     def to_dict(self) -> dict:
@@ -68,7 +56,6 @@ class Membership:
                 "rack": self.rack, "hb": self.heartbeat, "state": ALIVE}
 
     def tick(self) -> None:
-        """Advance our heartbeat and age out peers we have not heard from."""
         with self._lock:
             self.heartbeat += 1
             now = time.time()
@@ -95,12 +82,6 @@ class Membership:
             return p
 
     def merge(self, records: List[dict]) -> List[str]:
-        """Fold a peer's view of the cluster into ours.
-
-        A record is accepted only if its heartbeat is strictly higher, which
-        makes merges idempotent and monotonic: a replayed message cannot
-        resurrect a dead node.
-        """
         learned = []
         with self._lock:
             now = time.time()
@@ -139,21 +120,11 @@ class Membership:
             return self.peers.get(node_id)
 
     def sample(self, k: int, exclude: Optional[set] = None) -> List[Peer]:
-        """Pick k random live peers to gossip with.
-
-        Uniform random choice is what gives gossip its log(N) spread and
-        its resilience to any one node being slow.
-        """
         cand = [p for p in self.alive() if not exclude or p.node_id not in exclude]
         if len(cand) <= k:
             return cand
         return self._rng.sample(cand, k)
 
     def by_proximity(self, candidates: List[Peer]) -> List[Peer]:
-        """Sort peers cheapest-first: same rack, then lowest RTT.
-
-        Recent failures push a peer down so a flapping node stops soaking up
-        requests.
-        """
         return sorted(candidates,
                       key=lambda p: (p.failures, 0 if p.rack == self.rack else 1, p.rtt))
