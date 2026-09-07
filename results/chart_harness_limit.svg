@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="760" height="430" fill="#fff"/>
+<text x="34" y="30" font-size="17" font-weight="600" fill="#12161f">The test harness is the bottleneck, not the protocol</text>
+<text x="34" y="50" font-size="12" fill="#6b7688">Aggregate throughput across the whole cluster, measured. It does not rise with node count, because every node is a thread on one machine.</text>
+<line x1="78" y1="364.0" x2="730" y2="364.0" stroke="#e3e7ee"/>
+<text x="69" y="367.5" font-size="11" fill="#6b7688" text-anchor="end">0</text>
+<line x1="78" y1="306.0" x2="730" y2="306.0" stroke="#e3e7ee"/>
+<text x="69" y="309.5" font-size="11" fill="#6b7688" text-anchor="end">479k</text>
+<line x1="78" y1="248.0" x2="730" y2="248.0" stroke="#e3e7ee"/>
+<text x="69" y="251.5" font-size="11" fill="#6b7688" text-anchor="end">958k</text>
+<line x1="78" y1="190.0" x2="730" y2="190.0" stroke="#e3e7ee"/>
+<text x="69" y="193.5" font-size="11" fill="#6b7688" text-anchor="end">1M</text>
+<line x1="78" y1="132.0" x2="730" y2="132.0" stroke="#e3e7ee"/>
+<text x="69" y="135.5" font-size="11" fill="#6b7688" text-anchor="end">2M</text>
+<line x1="78" y1="74.0" x2="730" y2="74.0" stroke="#e3e7ee"/>
+<text x="69" y="77.5" font-size="11" fill="#6b7688" text-anchor="end">2M</text>
+<text x="78.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">8</text>
+<text x="404.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">16</text>
+<text x="730.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">24</text>
+<line x1="78" y1="364" x2="730" y2="364" stroke="#c3cad6"/>
+<text x="404.0" y="406" font-size="11.5" fill="#12161f" text-anchor="middle">nodes in cluster</text>
+<text transform="translate(20,219.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">bytes/s across the whole cluster</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linejoin="round" points="78.0,105.1 404.0,121.5 730.0,137.4"/>
+<circle cx="78.0" cy="105.1" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="404.0" cy="121.5" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="730.0" cy="137.4" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<text x="724.0" y="126.4" font-size="11.5" font-weight="600" fill="#2563eb" text-anchor="end">aggregate throughput (B/s)</text>
+<text x="78" y="424" font-size="11" fill="#6b7688">Constant rate + linearly growing work = linearly growing wall-clock. That is arithmetic about this laptop, not the design.</text>
+</svg>

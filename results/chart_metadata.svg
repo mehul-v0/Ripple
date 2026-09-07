@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="760" height="430" fill="#fff"/>
+<text x="34" y="30" font-size="17" font-weight="600" fill="#12161f">Availability metadata per gossip round</text>
+<text x="34" y="50" font-size="12" fill="#6b7688">A Bloom summary answers 'which chunks do you have?' in a fixed budget; a raw ID list does not.</text>
+<line x1="78" y1="364.0" x2="730" y2="364.0" stroke="#e3e7ee"/>
+<text x="69" y="367.5" font-size="11" fill="#6b7688" text-anchor="end">56</text>
+<line x1="78" y1="306.0" x2="730" y2="306.0" stroke="#e3e7ee"/>
+<text x="69" y="309.5" font-size="11" fill="#6b7688" text-anchor="end">227</text>
+<line x1="78" y1="248.0" x2="730" y2="248.0" stroke="#e3e7ee"/>
+<text x="69" y="251.5" font-size="11" fill="#6b7688" text-anchor="end">915</text>
+<line x1="78" y1="190.0" x2="730" y2="190.0" stroke="#e3e7ee"/>
+<text x="69" y="193.5" font-size="11" fill="#6b7688" text-anchor="end">4k</text>
+<line x1="78" y1="132.0" x2="730" y2="132.0" stroke="#e3e7ee"/>
+<text x="69" y="135.5" font-size="11" fill="#6b7688" text-anchor="end">15k</text>
+<line x1="78" y1="74.0" x2="730" y2="74.0" stroke="#e3e7ee"/>
+<text x="69" y="77.5" font-size="11" fill="#6b7688" text-anchor="end">60k</text>
+<text x="78.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">9</text>
+<text x="364.4" y="384" font-size="11" fill="#6b7688" text-anchor="middle">66</text>
+<text x="665.7" y="384" font-size="11" fill="#6b7688" text-anchor="middle">537</text>
+<text x="730.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">840</text>
+<line x1="78" y1="364" x2="730" y2="364" stroke="#c3cad6"/>
+<text x="404.0" y="406" font-size="11.5" fill="#12161f" text-anchor="middle">chunks held by the node</text>
+<text transform="translate(20,219.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">bytes per round</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linejoin="round" points="78.0,267.2 364.4,184.4 665.7,97.3 730.0,78.7"/>
+<circle cx="78.0" cy="267.2" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="364.4" cy="184.4" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="665.7" cy="97.3" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="730.0" cy="78.7" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<text x="724.0" y="67.7" font-size="11.5" font-weight="600" fill="#2563eb" text-anchor="end">raw chunk-ID list</text>
+<polyline fill="none" stroke="#dc2626" stroke-width="2.4" stroke-linejoin="round" points="78.0,357.2 364.4,356.0 665.7,269.4 730.0,250.8"/>
+<circle cx="78.0" cy="357.2" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="364.4" cy="356.0" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="665.7" cy="269.4" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="730.0" cy="250.8" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<text x="724.0" y="239.8" font-size="11.5" font-weight="600" fill="#dc2626" text-anchor="end">Bloom summary</text>
+</svg>

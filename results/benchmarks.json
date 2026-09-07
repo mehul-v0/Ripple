@@ -1,0 +1,165 @@
+{
+  "generated": 1788726105.887565,
+  "quick": true,
+  "manifest_vs_bytes": [
+    {
+      "file_bytes": 1048576,
+      "manifest_bytes": 8365,
+      "manifest_sync_s": 0.0286,
+      "full_sync_s": 1.4637,
+      "speedup": 51.2,
+      "chunks": 113
+    },
+    {
+      "file_bytes": 8388608,
+      "manifest_bytes": 65099,
+      "manifest_sync_s": 0.0465,
+      "full_sync_s": 14.2616,
+      "speedup": 306.7,
+      "chunks": 898
+    }
+  ],
+  "source_egress": [
+    {
+      "nodes": 3,
+      "file_bytes": 2097152,
+      "receivers": 2,
+      "unique_bytes": 2097152,
+      "unique_ratio": 1.0,
+      "ripple_egress": 2411561,
+      "ripple_convergence_s": 2.904,
+      "ripple_egress_ratio": 1.15,
+      "ripple_egress_per_receiver": 0.575,
+      "star_egress": 4194304,
+      "star_convergence_s": 4.184,
+      "star_egress_ratio": 2.0,
+      "star_egress_per_receiver": 1.0
+    },
+    {
+      "nodes": 6,
+      "file_bytes": 2097152,
+      "receivers": 5,
+      "unique_bytes": 2097152,
+      "unique_ratio": 1.0,
+      "ripple_egress": 2999350,
+      "ripple_convergence_s": 4.729,
+      "ripple_egress_ratio": 1.43,
+      "ripple_egress_per_receiver": 0.286,
+      "star_egress": 10485760,
+      "star_convergence_s": 6.979,
+      "star_egress_ratio": 5.0,
+      "star_egress_per_receiver": 1.0
+    },
+    {
+      "nodes": 10,
+      "file_bytes": 2097152,
+      "receivers": 9,
+      "unique_bytes": 2097152,
+      "unique_ratio": 1.0,
+      "ripple_egress": 4277357,
+      "ripple_convergence_s": 8.148,
+      "ripple_egress_ratio": 2.04,
+      "ripple_egress_per_receiver": 0.227,
+      "star_egress": 18874368,
+      "star_convergence_s": 11.457,
+      "star_egress_ratio": 9.0,
+      "star_egress_per_receiver": 1.0
+    }
+  ],
+  "incremental_edit": {
+    "file_bytes": 4194304,
+    "bytes_moved": 8579,
+    "percent_of_file": 0.205,
+    "changed_chunk_bytes": 8579
+  },
+  "dedup": {
+    "logical_bytes": 46137344,
+    "physical_bytes": 3203141,
+    "ratio": 14.4,
+    "chunks": 300
+  },
+  "failure_recovery": {
+    "nodes": 6,
+    "file_bytes": 2097152,
+    "covered": true,
+    "coverage_s": 2.889,
+    "incomplete_at_kill": 4,
+    "recovery_s": 0.242,
+    "converged": true
+  },
+  "metadata_scaling": [
+    {
+      "chunks": 9,
+      "bloom_bytes": 66,
+      "raw_id_bytes": 576,
+      "reduction": 8.7
+    },
+    {
+      "chunks": 66,
+      "bloom_bytes": 68,
+      "raw_id_bytes": 4224,
+      "reduction": 62.1
+    },
+    {
+      "chunks": 537,
+      "bloom_bytes": 547,
+      "raw_id_bytes": 34368,
+      "reduction": 62.8
+    },
+    {
+      "chunks": 840,
+      "bloom_bytes": 855,
+      "raw_id_bytes": 53760,
+      "reduction": 62.9
+    }
+  ],
+  "ablation": [
+    {
+      "config": "naive rarest-first",
+      "super_seed": false,
+      "salt": false,
+      "runs": 3,
+      "publisher_share_pct": 72.789,
+      "publisher_share_pct_min": 70.254,
+      "publisher_share_pct_max": 72.975,
+      "source_egress_ratio": 5.067,
+      "source_egress_ratio_min": 4.912,
+      "source_egress_ratio_max": 5.127,
+      "convergence_s": 13.126,
+      "convergence_s_min": 12.695,
+      "convergence_s_max": 14.126
+    },
+    {
+      "config": "+ per-node salt",
+      "super_seed": false,
+      "salt": true,
+      "runs": 3,
+      "publisher_share_pct": 23.253,
+      "publisher_share_pct_min": 22.325,
+      "publisher_share_pct_max": 24.923,
+      "source_egress_ratio": 1.632,
+      "source_egress_ratio_min": 1.571,
+      "source_egress_ratio_max": 1.783,
+      "convergence_s": 6.959,
+      "convergence_s_min": 6.738,
+      "convergence_s_max": 7.1
+    },
+    {
+      "config": "+ salt + super-seed",
+      "super_seed": true,
+      "salt": true,
+      "runs": 3,
+      "publisher_share_pct": 31.54,
+      "publisher_share_pct_min": 30.179,
+      "publisher_share_pct_max": 31.787,
+      "source_egress_ratio": 2.221,
+      "source_egress_ratio_min": 2.11,
+      "source_egress_ratio_max": 2.262,
+      "convergence_s": 8.08,
+      "convergence_s_min": 6.571,
+      "convergence_s_max": 8.322
+    }
+  ],
+  "ablation_nodes": 8,
+  "ablation_best": "+ per-node salt"
+}

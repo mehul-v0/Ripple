@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="760" height="430" fill="#fff"/>
+<text x="34" y="30" font-size="17" font-weight="600" fill="#12161f">Bytes sent by the publisher as the cluster grows</text>
+<text x="34" y="50" font-size="12" fill="#6b7688">Measured on a real cluster. Star topology sends the file once per node; Ripple lets every node that holds a chunk serve it.</text>
+<line x1="78" y1="364.0" x2="730" y2="364.0" stroke="#e3e7ee"/>
+<text x="69" y="367.5" font-size="11" fill="#6b7688" text-anchor="end">0</text>
+<line x1="78" y1="306.0" x2="730" y2="306.0" stroke="#e3e7ee"/>
+<text x="69" y="309.5" font-size="11" fill="#6b7688" text-anchor="end">4M</text>
+<line x1="78" y1="248.0" x2="730" y2="248.0" stroke="#e3e7ee"/>
+<text x="69" y="251.5" font-size="11" fill="#6b7688" text-anchor="end">8M</text>
+<line x1="78" y1="190.0" x2="730" y2="190.0" stroke="#e3e7ee"/>
+<text x="69" y="193.5" font-size="11" fill="#6b7688" text-anchor="end">13M</text>
+<line x1="78" y1="132.0" x2="730" y2="132.0" stroke="#e3e7ee"/>
+<text x="69" y="135.5" font-size="11" fill="#6b7688" text-anchor="end">17M</text>
+<line x1="78" y1="74.0" x2="730" y2="74.0" stroke="#e3e7ee"/>
+<text x="69" y="77.5" font-size="11" fill="#6b7688" text-anchor="end">21M</text>
+<text x="78.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">3</text>
+<text x="357.4" y="384" font-size="11" fill="#6b7688" text-anchor="middle">6</text>
+<text x="730.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">10</text>
+<line x1="78" y1="364" x2="730" y2="364" stroke="#c3cad6"/>
+<text x="404.0" y="406" font-size="11.5" fill="#12161f" text-anchor="middle">nodes in cluster</text>
+<text transform="translate(20,219.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">bytes out of the source</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linejoin="round" points="78.0,330.9 357.4,322.9 730.0,305.3"/>
+<circle cx="78.0" cy="330.9" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="357.4" cy="322.9" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="730.0" cy="305.3" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<text x="724.0" y="294.3" font-size="11.5" font-weight="600" fill="#2563eb" text-anchor="end">Ripple (swarm)</text>
+<polyline fill="none" stroke="#dc2626" stroke-width="2.4" stroke-linejoin="round" points="78.0,306.5 357.4,220.2 730.0,105.1"/>
+<circle cx="78.0" cy="306.5" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="357.4" cy="220.2" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="730.0" cy="105.1" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<text x="724.0" y="94.1" font-size="11.5" font-weight="600" fill="#dc2626" text-anchor="end">Star (naive)</text>
+<text x="78" y="424" font-size="11" fill="#6b7688">File size: 2 MB. Lower is better.</text>
+</svg>

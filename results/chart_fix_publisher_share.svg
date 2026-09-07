@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" width="700" height="400" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="700" height="400" fill="#fff"/>
+<text x="34" y="34" font-size="18" font-weight="600" fill="#12161f">The swarm was secretly a star</text>
+<text x="34" y="55" font-size="12" fill="#6b7688">Share of all chunks served by the publisher, 8-node cluster.</text>
+<rect x="132.9" y="132.4" width="123.1" height="201.6" rx="4" fill="#dc2626"/>
+<text x="194.5" y="120.4" font-size="21" font-weight="700" fill="#dc2626" text-anchor="middle">73%</text>
+<text x="194.5" y="356" font-size="12.5" fill="#12161f" text-anchor="middle">rarest-first alone</text>
+<rect x="329.9" y="269.6" width="123.1" height="64.4" rx="4" fill="#059669"/>
+<text x="391.5" y="257.6" font-size="21" font-weight="700" fill="#059669" text-anchor="middle">23%</text>
+<text x="391.5" y="356" font-size="12.5" fill="#12161f" text-anchor="middle">+ per-node salt</text>
+<line x1="96" y1="334" x2="490" y2="334" stroke="#c3cad6"/>
+<text x="516" y="210" font-size="40" font-weight="700" fill="#059669">&#8595;</text>
+<text x="550" y="208" font-size="27" font-weight="700" fill="#059669">68%</text>
+<text x="550" y="228" font-size="12" fill="#6b7688">reduction</text>
+<text transform="translate(24,208.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">% of chunks served by publisher</text>
+<text x="34" y="386" font-size="11" fill="#6b7688">Same code, same hardware, same run: two scheduling flags toggled.</text>
+</svg>

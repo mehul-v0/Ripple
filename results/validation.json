@@ -1,0 +1,241 @@
+{
+  "file_bytes": 4194304,
+  "pieces": 256,
+  "config": {
+    "gossip_interval": 0.35,
+    "gossip_fanout": 3,
+    "gossip_cost": 0.004,
+    "intra_rack_rtt": 0.0004,
+    "inter_rack_rtt": 0.004,
+    "upload_slots": 4,
+    "download_slots": 8,
+    "slot_bandwidth": 60000000.0,
+    "racks": 4,
+    "chunk_size": 8192,
+    "manifest_overhead": 0.0008,
+    "host_slots": 16,
+    "host_throughput": 6578020.535405709,
+    "peer_working_set": 24,
+    "plan_window": 48,
+    "plan_refresh": 24,
+    "fetch_tick": 0.05,
+    "stall_after": 5.0,
+    "plan_limit": 16,
+    "seed": 42
+  },
+  "calibrated_on": 8,
+  "comparisons": [
+    {
+      "nodes": 8,
+      "real": {
+        "nodes": 8,
+        "pieces": 451,
+        "manifest_all_known_s": 0.2344,
+        "convergence_s": 7.943,
+        "source_egress": 4093018,
+        "source_egress_ratio": 0.976,
+        "total_fetched": 16978801,
+        "aggregate_throughput": 2137570.2,
+        "wall_s": 11.183,
+        "convergence_spread_pct": 12.2,
+        "trials": [
+          7.5855,
+          7.943,
+          8.5576
+        ]
+      },
+      "sim": {
+        "nodes": 8,
+        "pieces": 256,
+        "file_bytes": 4194304,
+        "policy": "swarm",
+        "alive": 8,
+        "converged": true,
+        "stalled": false,
+        "coverage_s": 7.1502,
+        "convergence_s": 7.9498,
+        "manifest_all_known_s": 0.5706,
+        "source_egress": 6504448,
+        "source_egress_ratio": 1.55,
+        "total_bytes_moved": 29540352,
+        "gossip_messages": 654,
+        "transfers": 1803
+      },
+      "convergence_err_pct": 0.09,
+      "egress_err_pct": 58.81,
+      "predicted": false
+    },
+    {
+      "nodes": 16,
+      "real": {
+        "nodes": 16,
+        "pieces": 451,
+        "manifest_all_known_s": 0.1669,
+        "convergence_s": 18.1741,
+        "source_egress": 7374442,
+        "source_egress_ratio": 1.758,
+        "total_fetched": 36383145,
+        "aggregate_throughput": 2001923.7,
+        "wall_s": 21.633,
+        "convergence_spread_pct": 3.3,
+        "trials": [
+          17.6794,
+          18.1741,
+          18.2779
+        ]
+      },
+      "sim": {
+        "nodes": 16,
+        "pieces": 256,
+        "file_bytes": 4194304,
+        "policy": "swarm",
+        "alive": 16,
+        "converged": true,
+        "stalled": false,
+        "coverage_s": 10.7991,
+        "convergence_s": 13.8408,
+        "manifest_all_known_s": 0.5352,
+        "source_egress": 7061504,
+        "source_egress_ratio": 1.68,
+        "total_bytes_moved": 63209472,
+        "gossip_messages": 2034,
+        "transfers": 3858
+      },
+      "convergence_err_pct": 23.84,
+      "egress_err_pct": 4.44,
+      "predicted": true
+    },
+    {
+      "nodes": 24,
+      "real": {
+        "nodes": 24,
+        "pieces": 451,
+        "manifest_all_known_s": 0.3615,
+        "convergence_s": 29.8188,
+        "source_egress": 8955179,
+        "source_egress_ratio": 2.135,
+        "total_fetched": 55787489,
+        "aggregate_throughput": 1870883.7,
+        "wall_s": 34.265,
+        "convergence_spread_pct": 19.3,
+        "trials": [
+          28.766,
+          29.8188,
+          34.507
+        ]
+      },
+      "sim": {
+        "nodes": 24,
+        "pieces": 256,
+        "file_bytes": 4194304,
+        "policy": "swarm",
+        "alive": 24,
+        "converged": true,
+        "stalled": false,
+        "coverage_s": 15.6498,
+        "convergence_s": 20.4407,
+        "manifest_all_known_s": 0.7423,
+        "source_egress": 7733248,
+        "source_egress_ratio": 1.84,
+        "total_bytes_moved": 97468416,
+        "gossip_messages": 4380,
+        "transfers": 5949
+      },
+      "convergence_err_pct": 31.45,
+      "egress_err_pct": 13.82,
+      "predicted": true
+    }
+  ],
+  "measured_aggregate_throughput": 2003459.2,
+  "repeats": 3,
+  "noise_floor_pct": 11.59,
+  "throughput_by_nodes": [
+    [
+      8,
+      2137570.2
+    ],
+    [
+      16,
+      2001923.7
+    ],
+    [
+      24,
+      1870883.7
+    ]
+  ],
+  "mean_convergence_error_pct": 27.65,
+  "mean_egress_error_pct": 9.13,
+  "naive_convergence_error_pct": 60.21,
+  "verdict": "the model reproduces both the traffic and the timing of the real cluster on unseen sizes; the projection below is a reasoned estimate",
+  "projection_mode": "distributed (no shared-host cap)",
+  "projection": [
+    {
+      "nodes": 100,
+      "pieces": 256,
+      "file_bytes": 4194304,
+      "policy": "swarm",
+      "alive": 100,
+      "converged": true,
+      "stalled": false,
+      "coverage_s": 7.8095,
+      "convergence_s": 8.6513,
+      "manifest_all_known_s": 1.0861,
+      "source_egress": 13615104,
+      "source_egress_ratio": 3.25,
+      "total_bytes_moved": 417251328,
+      "gossip_messages": 7530,
+      "transfers": 25467
+    },
+    {
+      "nodes": 300,
+      "pieces": 256,
+      "file_bytes": 4194304,
+      "policy": "swarm",
+      "alive": 300,
+      "converged": true,
+      "stalled": false,
+      "coverage_s": 9.4079,
+      "convergence_s": 10.4578,
+      "manifest_all_known_s": 1.5745,
+      "source_egress": 18300928,
+      "source_egress_ratio": 4.36,
+      "total_bytes_moved": 1259339776,
+      "gossip_messages": 26943,
+      "transfers": 76864
+    },
+    {
+      "nodes": 600,
+      "pieces": 256,
+      "file_bytes": 4194304,
+      "policy": "swarm",
+      "alive": 600,
+      "converged": true,
+      "stalled": false,
+      "coverage_s": 10.3011,
+      "convergence_s": 11.6098,
+      "manifest_all_known_s": 1.7166,
+      "source_egress": 21479424,
+      "source_egress_ratio": 5.12,
+      "total_bytes_moved": 2521350144,
+      "gossip_messages": 59859,
+      "transfers": 153891
+    },
+    {
+      "nodes": 1000,
+      "pieces": 256,
+      "file_bytes": 4194304,
+      "policy": "swarm",
+      "alive": 1000,
+      "converged": true,
+      "stalled": false,
+      "coverage_s": 11.4611,
+      "convergence_s": 12.6569,
+      "manifest_all_known_s": 1.6299,
+      "source_egress": 24821760,
+      "source_egress_ratio": 5.92,
+      "total_bytes_moved": 4201398272,
+      "gossip_messages": 108540,
+      "transfers": 256433
+    }
+  ]
+}

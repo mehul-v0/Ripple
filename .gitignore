@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.ripple/
+.ripple-demo/
+.ripple-cluster-*/
+results/*.log
+docker/docker-compose.yml
+.DS_Store

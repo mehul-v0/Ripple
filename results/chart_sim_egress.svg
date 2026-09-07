@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="760" height="400" fill="#fff"/>
+<text x="34" y="30" font-size="17" font-weight="600" fill="#12161f">Source egress stays flat while a star topology grows linearly</text>
+<text x="34" y="50" font-size="12" fill="#6b7688">Simulated. A star at 1,000 nodes would send 1,000x the file; Ripple sends ~7x.</text>
+<line x1="78" y1="326.0" x2="730" y2="326.0" stroke="#e3e7ee"/>
+<text x="69" y="329.5" font-size="11" fill="#6b7688" text-anchor="end">0</text>
+<line x1="78" y1="275.6" x2="730" y2="275.6" stroke="#e3e7ee"/>
+<text x="69" y="279.1" font-size="11" fill="#6b7688" text-anchor="end">0.94</text>
+<line x1="78" y1="225.2" x2="730" y2="225.2" stroke="#e3e7ee"/>
+<text x="69" y="228.7" font-size="11" fill="#6b7688" text-anchor="end">1.9</text>
+<line x1="78" y1="174.8" x2="730" y2="174.8" stroke="#e3e7ee"/>
+<text x="69" y="178.3" font-size="11" fill="#6b7688" text-anchor="end">2.8</text>
+<line x1="78" y1="124.4" x2="730" y2="124.4" stroke="#e3e7ee"/>
+<text x="69" y="127.9" font-size="11" fill="#6b7688" text-anchor="end">3.8</text>
+<line x1="78" y1="74.0" x2="730" y2="74.0" stroke="#e3e7ee"/>
+<text x="69" y="77.5" font-size="11" fill="#6b7688" text-anchor="end">4.7</text>
+<rect x="102.4" y="239.7" width="81.5" height="86.3" rx="3" fill="#2563eb"/>
+<text x="143.2" y="232.7" font-size="11.5" font-weight="600" fill="#12161f" text-anchor="middle">1.6x</text>
+<text x="143.2" y="346" font-size="11" fill="#6b7688" text-anchor="middle">10</text>
+<rect x="232.9" y="204.9" width="81.5" height="121.1" rx="3" fill="#dc2626"/>
+<text x="273.6" y="197.9" font-size="11.5" font-weight="600" fill="#12161f" text-anchor="middle">2.3x</text>
+<text x="273.6" y="346" font-size="11" fill="#6b7688" text-anchor="middle">25</text>
+<rect x="363.2" y="183.5" width="81.5" height="142.5" rx="3" fill="#059669"/>
+<text x="404.0" y="176.5" font-size="11.5" font-weight="600" fill="#12161f" text-anchor="middle">2.7x</text>
+<text x="404.0" y="346" font-size="11" fill="#6b7688" text-anchor="middle">50</text>
+<rect x="493.6" y="161.5" width="81.5" height="164.5" rx="3" fill="#d97706"/>
+<text x="534.4" y="154.5" font-size="11.5" font-weight="600" fill="#12161f" text-anchor="middle">3.1x</text>
+<text x="534.4" y="346" font-size="11" fill="#6b7688" text-anchor="middle">100</text>
+<rect x="624.0" y="106.9" width="81.5" height="219.1" rx="3" fill="#2563eb"/>
+<text x="664.8" y="99.9" font-size="11.5" font-weight="600" fill="#12161f" text-anchor="middle">4.1x</text>
+<text x="664.8" y="346" font-size="11" fill="#6b7688" text-anchor="middle">300</text>
+<text transform="translate(20,200.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">publisher egress (multiples of file size)</text>
+</svg>

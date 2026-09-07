@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ripple — Cluster File Sync</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#131823; --panel2:#0f141e; --line:#232b3a;
+    --ink:#e6edf7; --dim:#8b98ad; --faint:#5b6678;
+    --phantom:#3d4a63; --partial:#e0a33e; --resident:#3ddc91; --dead:#ff5c5c;
+    --accent:#5aa9ff; --warn:#ff9f45;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header{display:flex;align-items:baseline;gap:18px;padding:14px 20px;
+         border-bottom:1px solid var(--line);background:var(--panel2);flex-wrap:wrap}
+  h1{margin:0;font-size:17px;letter-spacing:.14em;font-weight:600}
+  h1 .dot{color:var(--accent)}
+  .tag{color:var(--faint);font-size:11.5px}
+  .stats{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
+  .stat b{display:block;font-size:16px;color:var(--ink);font-weight:600}
+  .stat span{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.09em}
+  main{display:grid;grid-template-columns:minmax(420px,1.15fr) minmax(380px,1fr);
+       gap:14px;padding:14px;align-items:start}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .panel > h2{margin:0;padding:9px 13px;font-size:11px;letter-spacing:.12em;
+              text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);
+              background:var(--panel2);font-weight:600;display:flex;gap:10px;align-items:center}
+  .panel > h2 .right{margin-left:auto;color:var(--faint);text-transform:none;letter-spacing:0}
+  .body{padding:12px 13px}
+  svg{display:block;width:100%;height:auto}
+  .legend{display:flex;gap:14px;padding:0 13px 11px;color:var(--dim);font-size:11px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;
+            vertical-align:middle}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;color:var(--faint);font-weight:500;font-size:10.5px;
+     text-transform:uppercase;letter-spacing:.07em;padding:5px 8px;border-bottom:1px solid var(--line)}
+  td{padding:6px 8px;border-bottom:1px solid #1a2130}
+  tr.sel td{background:#182236}
+  tr.file{cursor:pointer}
+  tr.file:hover td{background:#161d2b}
+  .bar{height:6px;border-radius:3px;background:#1d2534;overflow:hidden;min-width:70px}
+  .bar>div{height:100%;background:linear-gradient(90deg,var(--partial),var(--resident))}
+  .mono{color:var(--dim)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px}
+  .tile{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 10px}
+  .tile b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+  .tile span{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  button{background:#1c2432;color:var(--ink);border:1px solid #2b3648;border-radius:6px;
+         padding:6px 10px;font:inherit;font-size:11.5px;cursor:pointer}
+  button:hover{background:#243044;border-color:#3a4860}
+  button.danger{border-color:#5a2b2b;color:#ffb3b3}
+  button.danger:hover{background:#37201f}
+  button.go{border-color:#2b5a45;color:#9befcb}
+  button.go:hover{background:#1c3a2c}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
+  .row label{color:var(--faint);font-size:11px;margin-right:2px}
+  select,input{background:#0d121b;color:var(--ink);border:1px solid #2b3648;
+               border-radius:6px;padding:5px 7px;font:inherit;font-size:11.5px}
+  #log{height:210px;overflow-y:auto;font-size:11.5px;padding:8px 13px}
+  #log div{padding:2px 0;border-bottom:1px solid #161c28;display:flex;gap:8px}
+  #log .who{color:var(--accent);min-width:52px}
+  #log .kind{min-width:74px;color:var(--faint)}
+  .k-conflict .kind,.k-error .kind{color:var(--warn)}
+  .k-heal .kind,.k-repair .kind{color:var(--resident)}
+  .k-rollback .kind{color:var(--accent)}
+  .hint{color:var(--faint);font-size:11px;padding:0 13px 11px;line-height:1.6}
+  .node-label{font-size:8px;fill:var(--faint)}
+  circle.node{cursor:pointer;transition:r .2s}
+  circle.node:hover{stroke:#fff;stroke-width:1.5}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>RIPPLE<span class="dot">.</span></h1>
+  <span class="tag">manifests first &middot; bytes on demand</span>
+  <div class="stats">
+    <div class="stat"><b id="s-nodes">–</b><span>nodes up</span></div>
+    <div class="stat"><b id="s-files">–</b><span>files</span></div>
+    <div class="stat"><b id="s-moved">–</b><span>bytes moved</span></div>
+    <div class="stat"><b id="s-resident">–</b><span>resident</span></div>
+    <div class="stat"><b id="s-dedup">–</b><span>dedup</span></div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="panel">
+      <h2>Cluster <span class="right" id="focus-label">no file selected</span></h2>
+      <svg id="ring" viewBox="0 0 640 460" aria-label="cluster node graph"></svg>
+      <div class="legend">
+        <span><i style="background:var(--phantom)"></i>PHANTOM — manifest only</span>
+        <span><i style="background:var(--partial)"></i>PARTIAL — materialising</span>
+        <span><i style="background:var(--resident)"></i>RESIDENT — every byte local</span>
+        <span><i style="background:var(--dead)"></i>down / partitioned</span>
+      </div>
+      <div class="hint">Ring size reflects chunks held. Click any node to target it with the
+        chaos controls below. Arcs show gossip reach as the manifest spreads.</div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>Chaos <span class="right">target: <b id="target">—</b></span></h2>
+      <div class="body">
+        <div class="row">
+          <label>node</label>
+          <select id="node-pick"></select>
+          <button class="danger" data-c="kill">kill</button>
+          <button class="go" data-c="revive">revive</button>
+          <button class="danger" data-c="corrupt">corrupt a chunk</button>
+        </div>
+        <div class="row">
+          <label>link</label>
+          <button data-c="latency" data-ms="300">+300 ms latency</button>
+          <button data-c="throttle" data-bps="200000">throttle 200 KB/s</button>
+          <button data-c="drop" data-rate="0.3">drop 30%</button>
+          <button data-c="partition">partition from all</button>
+          <button class="go" data-c="reset">reset this node</button>
+        </div>
+        <div class="row">
+          <label>cluster</label>
+          <button class="danger" data-c="kill-third">kill a third of the cluster</button>
+          <button class="go" data-c="heal-all">heal everything</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h2>Files <span class="right" id="file-count"></span></h2>
+      <table>
+        <thead><tr><th>path</th><th class="num">size</th><th class="num">manifest</th>
+          <th style="width:34%">materialised across cluster</th></tr></thead>
+        <tbody id="files"></tbody>
+      </table>
+      <div class="hint">A file is <em>present</em> on every node the moment its manifest
+        lands. The bar shows how many chunks have actually been pulled — which for most
+        files, most of the time, is deliberately not all of them.</div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>Demo</h2>
+      <div class="body">
+        <div class="row">
+          <button class="go" data-a="publish" data-size="8">publish 8 MB</button>
+          <button class="go" data-a="publish" data-size="64">publish 64 MB</button>
+          <button data-a="edit">edit 1 line</button>
+          <button data-a="materialise">materialise everywhere</button>
+          <button data-a="rollback">rollback</button>
+        </div>
+        <div class="row">
+          <label>config</label>
+          <button class="go" data-a="publish_conf">publish config</button>
+          <button class="danger" data-a="drift">drift one node</button>
+          <button data-a="check_drift">find drift (0 bytes)</button>
+        </div>
+        <div id="drift-out" class="mono" style="font-size:11.5px;margin:-2px 0 9px"></div>
+        <div class="grid" id="tiles"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>Events</h2>
+      <div id="log"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+let STATE = null, FOCUS = null, PICKED = null, SEEN = new Set();
+
+const fmt = n => {
+  if (n === undefined || n === null) return "–";
+  const u = ["B","KB","MB","GB","TB"];
+  let i = 0; n = Number(n);
+  while (n >= 1024 && i < u.length-1) { n /= 1024; i++; }
+  return (i === 0 ? n.toFixed(0) : n.toFixed(1)) + " " + u[i];
+};
+
+async function poll(){
+  try{
+    const r = await fetch("/api/state");
+    STATE = await r.json();
+    render();
+  }catch(e){ /* a killed dashboard host is itself a valid demo state */ }
+  setTimeout(poll, 500);
+}
+
+function stateOf(node, path){
+  if (node.unreachable || (node.chaos && node.chaos.killed)) return "DEAD";
+  const f = node.files && node.files[path];
+  return f ? f.state : "ABSENT";
+}
+
+function render(){
+  if (!STATE) return;
+  const nodes = STATE.nodes, sum = STATE.summary;
+
+  // pick a focus file the first time one appears
+  if (!FOCUS && sum.files.length) FOCUS = sum.files[0].path;
+  const focus = sum.files.find(f => f.path === FOCUS);
+
+  $("#s-nodes").textContent = sum.alive + " / " + nodes.length;
+  $("#s-files").textContent = sum.files.length;
+  $("#s-moved").textContent = fmt(sum.totals.bytes_fetched);
+  $("#s-resident").textContent = focus ? (focus.RESIDENT||0) + " / " + nodes.length : "–";
+  const dr = nodes.length ? nodes.reduce((a,n)=>a+(n.dedup_ratio||1),0)/nodes.length : 1;
+  $("#s-dedup").textContent = dr.toFixed(2) + "x";
+  $("#focus-label").textContent = FOCUS || "no file selected";
+  $("#file-count").textContent = sum.files.length + " tracked";
+
+  drawRing(nodes, FOCUS);
+  drawFiles(sum.files, nodes.length);
+  drawTiles(sum.totals, nodes);
+  drawPicker(nodes);
+  drawLog(sum.events);
+}
+
+function drawRing(nodes, path){
+  const W = 640, H = 460, cx = W/2, cy = H/2;
+  const R = Math.min(cx, cy) - 46;
+  const n = nodes.length || 1;
+  const pos = nodes.map((_, i) => {
+    const a = (i / n) * Math.PI * 2 - Math.PI/2;
+    return [cx + R*Math.cos(a), cy + R*Math.sin(a)];
+  });
+  const colorFor = s => s === "RESIDENT" ? "var(--resident)"
+    : s === "PARTIAL" ? "var(--partial)"
+    : s === "PHANTOM" ? "var(--phantom)"
+    : s === "DEAD" ? "var(--dead)" : "#1b2231";
+
+  let svg = "";
+  // faint chords between nodes that know each other: the gossip mesh
+  svg += '<g stroke="#1a2231" fill="none">';
+  nodes.forEach((nd, i) => {
+    (nd.peers||[]).slice(0, 4).forEach(p => {
+      const j = nodes.findIndex(x => x.node === p.id);
+      if (j > i) svg += `<line x1="${pos[i][0].toFixed(1)}" y1="${pos[i][1].toFixed(1)}" x2="${pos[j][0].toFixed(1)}" y2="${pos[j][1].toFixed(1)}"/>`;
+    });
+  });
+  svg += "</g>";
+
+  nodes.forEach((nd, i) => {
+    const st = stateOf(nd, path);
+    const f = nd.files && nd.files[path];
+    const frac = f && f.chunks ? f.have / f.chunks : 0;
+    const r = 8 + 7*frac;
+    const [x,y] = pos[i];
+    const ring = (nd.chaos && (nd.chaos.latency_ms>0 || nd.chaos.throughput_bps>0 || (nd.chaos.partitioned||[]).length))
+      ? `<circle cx="${x}" cy="${y}" r="${r+5}" fill="none" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3"/>` : "";
+    svg += ring + `<circle class="node" data-node="${nd.node}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorFor(st)}" stroke="${PICKED===nd.node?'#fff':'#0b0e14'}" stroke-width="${PICKED===nd.node?2:1}"><title>${nd.node} — ${st}${f?` (${f.have}/${f.chunks} chunks)`:""}</title></circle>`;
+    if (n <= 40) {
+      const lx = cx + (R+22)*Math.cos((i/n)*Math.PI*2 - Math.PI/2);
+      const ly = cy + (R+22)*Math.sin((i/n)*Math.PI*2 - Math.PI/2);
+      svg += `<text class="node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${nd.node}</text>`;
+    }
+  });
+
+  // centre readout
+  const res = nodes.filter(nd => stateOf(nd,path) === "RESIDENT").length;
+  const kn  = nodes.filter(nd => nd.files && nd.files[path]).length;
+  svg += `<text x="${cx}" y="${cy-8}" text-anchor="middle" fill="var(--ink)" font-size="26" font-weight="600">${kn}/${nodes.length}</text>`;
+  svg += `<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--faint)" font-size="10.5" letter-spacing="1.2">MANIFEST PRESENT</text>`;
+  svg += `<text x="${cx}" y="${cy+34}" text-anchor="middle" fill="var(--resident)" font-size="12">${res} fully resident</text>`;
+
+  $("#ring").innerHTML = svg;
+  $("#ring").querySelectorAll("circle.node").forEach(c =>
+    c.addEventListener("click", () => { PICKED = c.dataset.node; $("#node-pick").value = PICKED; render(); }));
+}
+
+function drawFiles(files, nNodes){
+  $("#files").innerHTML = files.map(f => {
+    const pct = f.want ? Math.round(100*f.have/f.want) : 0;
+    return `<tr class="file ${f.path===FOCUS?'sel':''}" data-path="${f.path}">
+      <td>${f.path}<div class="mono" style="font-size:10.5px">${f.RESIDENT||0} resident · ${f.PARTIAL||0} partial · ${f.PHANTOM||0} phantom</div></td>
+      <td class="num">${fmt(f.size)}</td>
+      <td class="num mono">${fmt(f.manifest_bytes)}</td>
+      <td><div class="bar"><div style="width:${pct}%"></div></div>
+          <span class="mono" style="font-size:10.5px">${pct}% of chunks pulled</span></td></tr>`;
+  }).join("") || `<tr><td colspan="4" class="mono" style="padding:14px">nothing published yet — use the demo buttons</td></tr>`;
+  $("#files").querySelectorAll("tr.file").forEach(tr =>
+    tr.addEventListener("click", () => { FOCUS = tr.dataset.path; render(); }));
+}
+
+function drawTiles(t, nodes){
+  const gossip = t.gossip_rounds || 0;
+  const tiles = [
+    ["manifests received", t.manifests_received || 0],
+    ["chunks served", t.chunks_served || 0],
+    ["bytes fetched", fmt(t.bytes_fetched)],
+    ["read faults", t.reads_faulted || 0],
+    ["gossip rounds", gossip],
+    ["conflicts kept", t.conflicts || 0],
+    ["corruption healed", t.corruption_detected || 0],
+  ];
+  $("#tiles").innerHTML = tiles.map(([k,v]) =>
+    `<div class="tile"><b>${v}</b><span>${k}</span></div>`).join("");
+}
+
+function drawPicker(nodes){
+  const sel = $("#node-pick");
+  const want = nodes.map(n => n.node).join(",");
+  if (sel.dataset.sig !== want){
+    sel.dataset.sig = want;
+    sel.innerHTML = nodes.map(n => `<option>${n.node}</option>`).join("");
+    if (PICKED) sel.value = PICKED;
+  }
+  if (!PICKED && nodes.length) PICKED = sel.value = nodes[0].node;
+  $("#target").textContent = PICKED || "—";
+}
+
+function drawLog(events){
+  const el = $("#log");
+  const fresh = events.filter(e => !SEEN.has(e.t + e.node + e.text)).reverse();
+  fresh.forEach(e => {
+    SEEN.add(e.t + e.node + e.text);
+    const d = document.createElement("div");
+    d.className = "k-" + e.kind;
+    d.innerHTML = `<span class="who">${e.node}</span><span class="kind">${e.kind}</span><span>${e.text}</span>`;
+    el.prepend(d);
+  });
+  while (el.children.length > 220) el.lastChild.remove();
+  if (SEEN.size > 3000) SEEN = new Set();
+}
+
+async function chaos(node, action, args){
+  await fetch("/api/chaos", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({node, action, args: args||{}})});
+}
+
+document.addEventListener("click", async ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  const nodes = STATE ? STATE.nodes : [];
+  PICKED = $("#node-pick").value || PICKED;
+
+  if (b.dataset.c){
+    const c = b.dataset.c;
+    b.disabled = true;
+    try{
+      if (c === "kill-third"){
+        const victims = nodes.slice(1).filter((_,i) => i % 3 === 0);
+        await Promise.all(victims.map(v => chaos(v.node, "kill", {})));
+      } else if (c === "heal-all"){
+        await Promise.all(nodes.map(v => chaos(v.node, "reset", {})));
+      } else if (c === "partition"){
+        await chaos(PICKED, "partition", {peers: nodes.map(n=>n.node).filter(x=>x!==PICKED)});
+      } else if (c === "latency"){
+        await chaos(PICKED, "latency", {ms: +b.dataset.ms});
+      } else if (c === "throttle"){
+        await chaos(PICKED, "throttle", {bps: +b.dataset.bps});
+      } else if (c === "drop"){
+        await chaos(PICKED, "drop", {rate: +b.dataset.rate});
+      } else if (c === "corrupt"){
+        await fetch("/api/action", {method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({action:"corrupt", node: PICKED, path: FOCUS})});
+      } else {
+        await chaos(PICKED, c, {});
+      }
+    } finally { b.disabled = false; }
+    return;
+  }
+
+  if (b.dataset.a){
+    b.disabled = true;
+    try{
+      const r = await fetch("/api/action", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({action: b.dataset.a, path: FOCUS,
+                              size_mb: b.dataset.size ? +b.dataset.size : undefined})});
+      const j = await r.json();
+      if (b.dataset.a === "check_drift" && j.ok){
+        const d = j.result.drifted || [];
+        const el = $("#drift-out");
+        el.innerHTML = d.length
+          ? d.map(x => `<div><b style="color:var(--warn)">${x.key}</b> differs on `
+              + `<b>${x.nodes.join(", ")}</b>` + (x.value ? ` &rarr; <code>${x.value}</code>` : "")
+              + ` <span style="color:var(--faint)">(${x.agree} nodes agree)</span></div>`).join("")
+              + `<div style="color:var(--resident)">found using manifests only &mdash; `
+              + `${j.result.bytes_moved_to_find_it} bytes of file data moved</div>`
+          : `<span style="color:var(--resident)">no drift: every node agrees</span>`;
+      }
+    } finally { b.disabled = false; }
+  }
+});
+
+poll();
+</script>
+</body>
+</html>

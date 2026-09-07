@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="760" height="430" fill="#fff"/>
+<text x="34" y="30" font-size="17" font-weight="600" fill="#12161f">The file exists everywhere long before the bytes arrive</text>
+<text x="34" y="50" font-size="12" fill="#6b7688">Manifest propagation versus full materialisation, same cluster, same file.</text>
+<line x1="78" y1="364.0" x2="730" y2="364.0" stroke="#e3e7ee"/>
+<text x="69" y="367.5" font-size="11" fill="#6b7688" text-anchor="end">0.024</text>
+<line x1="78" y1="306.0" x2="730" y2="306.0" stroke="#e3e7ee"/>
+<text x="69" y="309.5" font-size="11" fill="#6b7688" text-anchor="end">0.089</text>
+<line x1="78" y1="248.0" x2="730" y2="248.0" stroke="#e3e7ee"/>
+<text x="69" y="251.5" font-size="11" fill="#6b7688" text-anchor="end">0.33</text>
+<line x1="78" y1="190.0" x2="730" y2="190.0" stroke="#e3e7ee"/>
+<text x="69" y="193.5" font-size="11" fill="#6b7688" text-anchor="end">1.2</text>
+<line x1="78" y1="132.0" x2="730" y2="132.0" stroke="#e3e7ee"/>
+<text x="69" y="135.5" font-size="11" fill="#6b7688" text-anchor="end">4.4</text>
+<line x1="78" y1="74.0" x2="730" y2="74.0" stroke="#e3e7ee"/>
+<text x="69" y="77.5" font-size="11" fill="#6b7688" text-anchor="end">16</text>
+<text x="78.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">1M</text>
+<text x="730.0" y="384" font-size="11" fill="#6b7688" text-anchor="middle">8M</text>
+<line x1="78" y1="364" x2="730" y2="364" stroke="#c3cad6"/>
+<text x="404.0" y="406" font-size="11.5" fill="#12161f" text-anchor="middle">file size (bytes)</text>
+<text transform="translate(20,219.0) rotate(-90)" font-size="11.5" fill="#12161f" text-anchor="middle">seconds</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linejoin="round" points="78.0,356.7 730.0,335.0"/>
+<circle cx="78.0" cy="356.7" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<circle cx="730.0" cy="335.0" r="3.6" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<text x="724.0" y="324.0" font-size="11.5" font-weight="600" fill="#2563eb" text-anchor="end">manifest everywhere</text>
+<polyline fill="none" stroke="#dc2626" stroke-width="2.4" stroke-linejoin="round" points="78.0,180.8 730.0,79.1"/>
+<circle cx="78.0" cy="180.8" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<circle cx="730.0" cy="79.1" r="3.6" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+<text x="724.0" y="68.1" font-size="11.5" font-weight="600" fill="#dc2626" text-anchor="end">every byte everywhere</text>
+<text x="78" y="424" font-size="11" fill="#6b7688">Log scale on both axes. The gap is what lazy materialisation buys.</text>
+</svg>
